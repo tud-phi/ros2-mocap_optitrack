@@ -24,9 +24,14 @@ include_directories(include include/Eigen)
 add_executable(mocap_optitrack_w2b src/WorldToBase.cpp)
 ament_target_dependencies(mocap_optitrack_w2b rclcpp mocap_optitrack_interfaces)
 
+#install(DIRECTORY
+#  config
+#  DESTINATION share/${PROJECT_NAME}
+#)
 
 install(TARGETS 
   mocap_optitrack_w2b
   DESTINATION lib/${PROJECT_NAME})
+
 
 ament_package()
