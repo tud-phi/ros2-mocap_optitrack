@@ -29,7 +29,7 @@ WorldToBase::WorldToBase(): Node("world_to_base")
 //Callback to receive rigid body messages
 void WorldToBase::rigid_body_topic_callback(const mocap_optitrack_interfaces::msg::RigidBodyArray::SharedPtr msg) const
 {
-  //RCLCPP_INFO(this->get_logger(), "I heard: '%s'", msg->data.c_str());
+  RCLCPP_INFO(this->get_logger(), "I heard: ");
   // Transform the pose of all the rigid bodies from the frame of the motion capture system to the base frame of the robot
   transformPose(msg);
 }
