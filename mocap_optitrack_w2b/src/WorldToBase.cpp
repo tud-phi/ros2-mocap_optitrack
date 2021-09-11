@@ -16,7 +16,7 @@ WorldToBase::WorldToBase(): Node("mo_cap_subscriber")
   this->declare_parameter<float>("initial_offset_x", 0.0);
   this->declare_parameter<float>("initial_offset_y", -0.19);
   this->declare_parameter<float>("initial_offset_z", 0.0);
-  this->declare_parameter<float>("base_id", 0);
+  this->declare_parameter<int>("base_id", 0);
 
   //Event handler for RigidBody messages
   this->subscription_ = this->create_subscription<mocap_optitrack_interfaces::msg::RigidBodyArray>(
@@ -47,6 +47,12 @@ void WorldToBase::transformPose(const mocap_optitrack_interfaces::msg::RigidBody
   int i,i_base = -1;
   
   int nRB = (int) msg->rigid_bodies.size();
+
+  //Retreive the ID of the base frame
+  int BASE_STREAMING_ID = -1;
+  this->get_parameter("base_id", BASE_STREAMING_ID);
+
+  printf("BASE ID : %d\n", BASE_STREAMING_ID);
   
   // Get the pose of the base of the robot recorded by Motive
   for (i = 0; i < nRB; i++)
