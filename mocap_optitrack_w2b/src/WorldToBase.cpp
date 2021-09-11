@@ -4,6 +4,7 @@
 #include <WtoBconfig.h>//include the configuration file
  
 using namespace Eigen;
+using namespace std;
 
 WorldToBase::WorldToBase(): Node("mo_cap_subscriber")
 {
@@ -38,19 +39,21 @@ void WorldToBase::transformPose(const mocap_optitrack_interfaces::msg::RigidBody
   P_1 << 0,0,0,1;
 
   int i,i_base = -1;
+  
+  int nRB = (int) msg->rigid_bodies.size();
+  
   // Get the pose of the base of the robot recorded by Motive
-  for (i = 0; i < msg->rigid_bodies.size(); i++)
+  for (i = 0; i < nRB; i++)
   {
       if (msg->rigid_bodies[i].id == BASE_STREAMING_ID)
       {
         i_base = i;
         //Store the position of the robot base and the orientation
-        P_base << msg->rigid_bodies[i].p.x, msg->rigid_bodies[i].p.y, msg->rigid_bodies[i].p.z;
-        R_base = this->quatToRotm(msg->rigid_bodies[i].q.x,
-                                  msg->rigid_bodies[i].q.y,
-                                  msg->rigid_bodies[i].q.z,
-                                  msg->rigid_bodies[i].q.w);
-        //std::cout << R_base << std::endl;
+        P_base << msg->rigid_bodies[i].pose_stamped.pose.position.x, msg->rigid_bodies[i].pose_stamped.pose.position.y, msg->rigid_bodies[i].pose_stamped.pose.position.z;
+        R_base = this->quatToRotm(msg->rigid_bodies[i].pose_stamped.pose.orientation.x,
+                                  msg->rigid_bodies[i].pose_stamped.pose.orientation.y,
+                                  msg->rigid_bodies[i].pose_stamped.pose.orientation.z,
+                                  msg->rigid_bodies[i].pose_stamped.pose.orientation.w);
         break;
       }
   }
@@ -73,15 +76,15 @@ void WorldToBase::transformPose(const mocap_optitrack_interfaces::msg::RigidBody
   }
 
   // Iterate through all the rigid bodies
-  for (i = 0; i < msg->rigid_bodies.size(); i++)
+  for (i = 0; i < nRB; i++)
   {
       printf("ID : %ld\n", msg->rigid_bodies[i].id);
       // Transform first the position
-      P << msg->rigid_bodies[i].p.x, msg->rigid_bodies[i].p.y, msg->rigid_bodies[i].p.z; 
-      R = this->quatToRotm(msg->rigid_bodies[i].q.x,
-                           msg->rigid_bodies[i].q.y,
-                           msg->rigid_bodies[i].q.z,
-                           msg->rigid_bodies[i].q.w);
+      P << msg->rigid_bodies[i].pose_stamped.pose.position.x, msg->rigid_bodies[i].pose_stamped.pose.position.y, msg->rigid_bodies[i].pose_stamped.pose.position.z;
+      R = this->quatToRotm(msg->rigid_bodies[i].pose_stamped.pose.orientation.x,
+                           msg->rigid_bodies[i].pose_stamped.pose.orientation.y,
+                           msg->rigid_bodies[i].pose_stamped.pose.orientation.z,
+                           msg->rigid_bodies[i].pose_stamped.pose.orientation.w);
       P_1.segment(0,3) = P;//store in P_1 the current position of the marker
       //Compute the position of the point in the robot base frame
       std::cout << T_0_B.inverse()*P_1 << std::endl;

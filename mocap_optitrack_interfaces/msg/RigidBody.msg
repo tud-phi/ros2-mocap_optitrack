@@ -5,7 +5,5 @@ int64 id
 bool valid
 # mean error of the estimate
 float64 mean_error
-# Position of the body
-Point p
-#Orientation of the body as unit quaternion
-UnitQuaternion q
+#Pose of the body
+geometry_msgs/PoseStamped pose_stamped

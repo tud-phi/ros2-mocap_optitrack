@@ -21,8 +21,6 @@ find_package(ament_cmake REQUIRED)
 # add the dependencies to create the custom interfaces
 find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/Point.msg"
-  "msg/UnitQuaternion.msg"
   "msg/RigidBody.msg"
   "msg/RigidBodyArray.msg"
  )

@@ -43,13 +43,17 @@ void MoCapPublisher::sendRigidBodyMessage(sRigidBodyData* bodies, int nRigidBodi
       rb.id = bodies[i].ID;
       rb.valid =  bodies[i].params & 0x01;
       rb.mean_error = bodies[i].MeanError;
-      rb.p.x = bodies[i].x;
-      rb.p.y = bodies[i].y;
-      rb.p.z = bodies[i].z;
-      rb.q.x = bodies[i].qx;
-      rb.q.y = bodies[i].qy;
-      rb.q.z = bodies[i].qz;
-      rb.q.w = bodies[i].qw;
+      rb.pose_stamped.pose.position.x = bodies[i].x;
+      rb.pose_stamped.pose.position.y = bodies[i].y;
+      rb.pose_stamped.pose.position.z = bodies[i].z;
+      rb.pose_stamped.pose.orientation.x = bodies[i].qx;
+      rb.pose_stamped.pose.orientation.y = bodies[i].qy;
+      rb.pose_stamped.pose.orientation.z = bodies[i].qz;
+      rb.pose_stamped.pose.orientation.w = bodies[i].qw;
+
+      // Add the time stamp information
+      //rb.pose_stamped.header.stamp.sec = 1;
+      //rb.pose_stampled.header.stamp.nanosec = 1;
 
       // Add the current rigid body to the array of rigid bodies
       msg.rigid_bodies.push_back(rb);
