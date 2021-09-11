@@ -1,1 +1,16 @@
 #Configuration file for the NatNet client node (mocap_optitrack_pub)
+natnet_client:
+  ros__parameters:
+    #Address of the NatNet server
+    #Set to "host.docker.internal" if the node runs in a docker container on the same machine of the NatNet server.
+    #If, in addition, the container is hosted on a linux machine be sure to run the docker
+    #container with the option : --add-host host.docker.internal:host-gateway.
+    server_address: "10.125.37.2"
+    #Type of the connection: 0 = multicase, 1 = unicast. See NatNet SDK for more details
+    connection_type: 0
+    #Multicast address of the server
+    multi_cast_address: "239.255.42.99"
+    #Port where to send commands
+    server_command_port: 1510
+    #Port where to receive incoming data
+    server_data_port: 1511

@@ -15,10 +15,19 @@ using namespace std;
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
-MoCapPublisher::MoCapPublisher(): Node("mocap_publisher")
+MoCapPublisher::MoCapPublisher(): Node("natnet_client")
 {
+
+  //Declare the ROS2 parameters used by the NatNet Client
+  this->declare_parameter<std::string>("server_address", "10.125.37.2");
+  this->declare_parameter<int>("connection_type", 0);
+  this->declare_parameter<std::string>("multi_cast_address", "239.255.42.99");
+  this->declare_parameter<int>("server_command_port", 1510);
+  this->declare_parameter<int>("server_data_port", 1511);
+  
   this->publisher_ = this->create_publisher<mocap_optitrack_interfaces::msg::RigidBodyArray>("rigid_body_topic", 10);
   this->t_start = high_resolution_clock::now();//get the current time
+  //Just for testing purposes...
   this->timer_ = this->create_wall_timer(
       500ms, std::bind(&MoCapPublisher::sendFakeMessage, this));
 }
@@ -99,6 +108,43 @@ void MoCapPublisher::sendFakeMessage()
 
     //Free the rigid bodies
     free(bodies);
+}
+
+
+
+std::string MoCapPublisher::getServerAddress()
+{
+  std::string addr_;
+  this->get_parameter("server_address", addr_);
+  return addr_;
+}
+
+int MoCapPublisher::getConnectionType()
+{
+  int type_;
+  this->get_parameter("connection_type", type_);
+  return type_;
+}
+
+std::string MoCapPublisher::getMulticastAddress()
+{
+  std::string addr_;
+  this->get_parameter("multi_cast_address", addr_);
+  return addr_;
+}
+
+int MoCapPublisher::getServerCommandPort()
+{
+  int port_;
+  this->get_parameter("server_command_port", port_);
+  return port_;
+}
+
+int MoCapPublisher::getServerDataPort()
+{
+  int port_;
+  this->get_parameter("server_data_port", port_);
+  return port_;
 }
 
 

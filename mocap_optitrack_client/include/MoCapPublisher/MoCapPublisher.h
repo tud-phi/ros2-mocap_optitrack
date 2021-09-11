@@ -30,6 +30,11 @@ public:
     void sendRigidBodyMessage(sRigidBodyData* bodies, int nRigidBodies);
  
     // Getters
+    std::string getServerAddress();
+    int getConnectionType();
+    std::string getMulticastAddress();
+    int getServerCommandPort();
+    int getServerDataPort();
     
     // Setters
     

@@ -3,32 +3,27 @@
 #include "MoCapNatNetClient.h"
 #include <vector>
 
-
-// Include the configuration file to read all the information
-#include <myconfig.h>
-
 using namespace std;
- 
 
 // MoCapNatNetClient constructor
 MoCapNatNetClient::MoCapNatNetClient(MoCapPublisher* _moCapPublisher)
 {
-    // Create the connection parameters
-    if (SERVER_CONNECTION_TYPE == 0) g_connectParams.connectionType = ConnectionType_Multicast;
+    // Save the ROS2 publisher to send messages to this
+    this->moCapPublisher = _moCapPublisher;
+
+    // Create the connection parameters, retreiving the data from the ROS2 node
+    if (moCapPublisher->getConnectionType() == 0) g_connectParams.connectionType = ConnectionType_Multicast;
     else g_connectParams.connectionType = ConnectionType_Unicast;
-    g_connectParams.serverAddress = SERVER_ADDRESS;
-    g_connectParams.multicastAddress = MULTI_CAST_ADDRESS;
-    g_connectParams.serverDataPort = SERVER_DATA_PORT;
-    g_connectParams.serverCommandPort = SERVER_COMMAND_PORT;
+    g_connectParams.serverAddress = moCapPublisher->getServerAddress().c_str();
+    g_connectParams.multicastAddress = moCapPublisher->getMulticastAddress().c_str();
+    g_connectParams.serverDataPort = moCapPublisher->getServerDataPort();
+    g_connectParams.serverCommandPort = moCapPublisher->getServerCommandPort();
     
     // Struct where the data description will be saved
     pDataDefs = NULL;
 
     // Set the callback for the frames received by the server
     this->SetFrameReceivedCallback( dataFrameHandler, this );
-
-    // Save the ROS2 publisher to send messages to this
-    this->moCapPublisher = _moCapPublisher;
 }
 
 // Distructor
