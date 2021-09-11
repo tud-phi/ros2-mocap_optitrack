@@ -78,7 +78,11 @@ void WorldToBase::transformPose(const mocap_optitrack_interfaces::msg::RigidBody
   // Iterate through all the rigid bodies
   for (i = 0; i < nRB; i++)
   {
+      //Print some information
       printf("ID : %ld\n", msg->rigid_bodies[i].id);
+      //Print the time stamp of the message
+      printf("Time stamp : %d(s)---%d(ns)\n", msg->rigid_bodies[i].pose_stamped.header.stamp.sec, msg->rigid_bodies[i].pose_stamped.header.stamp.nanosec);
+
       // Transform first the position
       P << msg->rigid_bodies[i].pose_stamped.pose.position.x, msg->rigid_bodies[i].pose_stamped.pose.position.y, msg->rigid_bodies[i].pose_stamped.pose.position.z;
       R = this->quatToRotm(msg->rigid_bodies[i].pose_stamped.pose.orientation.x,

@@ -13,10 +13,12 @@
 
 using namespace std;
 using namespace std::chrono_literals;
+using namespace std::chrono;
 
 MoCapPublisher::MoCapPublisher(): Node("mocap_publisher")
 {
   this->publisher_ = this->create_publisher<mocap_optitrack_interfaces::msg::RigidBodyArray>("rigid_body_topic", 10);
+  this->t_start = high_resolution_clock::now();//get the current time
   this->timer_ = this->create_wall_timer(
       500ms, std::bind(&MoCapPublisher::sendFakeMessage, this));
 }
@@ -24,10 +26,13 @@ MoCapPublisher::MoCapPublisher(): Node("mocap_publisher")
 // Method that send over the ROS network the data of a rigid body
 void MoCapPublisher::sendRigidBodyMessage(sRigidBodyData* bodies, int nRigidBodies)
 {
-  printf("Sending message containing %d Rigid Bodies.\n\n", nRigidBodies);
-  // Publish the message
+  //Instanciate variables
   mocap_optitrack_interfaces::msg::RigidBodyArray msg;
+  high_resolution_clock::time_point t_current;
+  //duration<double> time_span_s, time_span_ns;
   
+  // Log
+  printf("Sending message containing %d Rigid Bodies.\n\n", nRigidBodies);
   // Loop over all the rigid bodies
   for(int i=0; i < nRigidBodies; i++)
   {
@@ -55,9 +60,13 @@ void MoCapPublisher::sendRigidBodyMessage(sRigidBodyData* bodies, int nRigidBodi
       rb.pose_stamped.pose.orientation.z = bodies[i].qz;
       rb.pose_stamped.pose.orientation.w = bodies[i].qw;
 
-      // Add the time stamp information
-      rb.pose_stamped.header.stamp.sec = 1;
-      rb.pose_stamped.header.stamp.nanosec = 1;
+      // Add the time stamp information both in seconds and nanoseconds
+      t_current = high_resolution_clock::now();
+      auto time_span_s  = duration_cast<seconds>(t_current - this->t_start);
+      auto time_span_ns = duration_cast<nanoseconds>(t_current - this->t_start);
+
+      rb.pose_stamped.header.stamp.sec = time_span_s.count();
+      rb.pose_stamped.header.stamp.nanosec = time_span_ns.count();
 
       // Add the current rigid body to the array of rigid bodies
       msg.rigid_bodies.push_back(rb);

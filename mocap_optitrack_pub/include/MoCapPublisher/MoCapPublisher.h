@@ -9,12 +9,14 @@
 
 
 using namespace std;
+using namespace std::chrono;
 class MoCapPublisher: public rclcpp::Node
 {
 private:
     //Attributes
     rclcpp::Publisher<mocap_optitrack_interfaces::msg::RigidBodyArray>::SharedPtr publisher_;
     rclcpp::TimerBase::SharedPtr timer_;
+    high_resolution_clock::time_point t_start;
 
     //Methods
     void sendFakeMessage();
