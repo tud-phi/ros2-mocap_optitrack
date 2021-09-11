@@ -5,7 +5,7 @@
 using namespace Eigen;
 using namespace std;
 
-WorldToBase::WorldToBase(): Node("mo_cap_subscriber")
+WorldToBase::WorldToBase(): Node("world_to_base")
 {
 
   //Declare the parameters of the node
@@ -45,7 +45,6 @@ void WorldToBase::transformPose(const mocap_optitrack_interfaces::msg::RigidBody
   P_1 << 0,0,0,1;
 
   int i,i_base = -1;
-  
   int nRB = (int) msg->rigid_bodies.size();
 
   //Retreive the ID of the base frame

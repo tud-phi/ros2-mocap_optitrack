@@ -1,0 +1,11 @@
+#Configuration file for the world_to_base node (w2b)
+world_to_base:
+  ros__parameters:
+      base_qx: 0.0
+      base_qy: 0.0
+      base_qz: 0.0
+      base_qw: 1.0
+      initial_offset_x: 0.0
+      initial_offset_y: -0.19
+      initial_offset_z: 0.0
+      base_id: 0
