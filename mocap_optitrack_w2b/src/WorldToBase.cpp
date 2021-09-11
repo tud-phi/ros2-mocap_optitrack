@@ -17,10 +17,13 @@ WorldToBase::WorldToBase(): Node("world_to_base")
   this->declare_parameter<float>("initial_offset_y", -0.19);
   this->declare_parameter<float>("initial_offset_z", 0.0);
   this->declare_parameter<int>("base_id", 0);
+  this->declare_parameter<std::string>("sub_topic", "rigid_body_topic");
 
-  //Event handler for RigidBody messages
+  //Subscribe to the topic for RigidBody messages
+  std::string sub_topic_;
+  this->get_parameter("sub_topic", sub_topic_);
   this->subscription_ = this->create_subscription<mocap_optitrack_interfaces::msg::RigidBodyArray>(
-    "rigid_body_topic", 10, std::bind(&WorldToBase::rigid_body_topic_callback, this, _1));
+    sub_topic_, 10, std::bind(&WorldToBase::rigid_body_topic_callback, this, _1));
 }
 
 //Callback to receive rigid body messages

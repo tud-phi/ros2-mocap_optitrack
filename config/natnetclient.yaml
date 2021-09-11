@@ -14,3 +14,5 @@ natnet_client:
     server_command_port: 1510
     #Port where to receive incoming data
     server_data_port: 1511
+    #Topic where data is published
+    pub_topic: "rigid_body_topic"

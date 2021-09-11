@@ -24,10 +24,17 @@ MoCapPublisher::MoCapPublisher(): Node("natnet_client")
   this->declare_parameter<std::string>("multi_cast_address", "239.255.42.99");
   this->declare_parameter<int>("server_command_port", 1510);
   this->declare_parameter<int>("server_data_port", 1511);
+  this->declare_parameter<std::string>("pub_topic", "rigid_body_topic");
   
-  this->publisher_ = this->create_publisher<mocap_optitrack_interfaces::msg::RigidBodyArray>("rigid_body_topic", 10);
+  //Create the publisher
+  std::string topic_;
+  this->get_parameter("pub_topic", topic_);
+  this->publisher_ = this->create_publisher<mocap_optitrack_interfaces::msg::RigidBodyArray>(topic_.c_str(), 10);
+  
+  //Get the current time for the timestamp of the messages
   this->t_start = high_resolution_clock::now();//get the current time
-  //Just for testing purposes...
+
+  //Just for testing purposes send make messages every 500ms
   this->timer_ = this->create_wall_timer(
       500ms, std::bind(&MoCapPublisher::sendFakeMessage, this));
 }
