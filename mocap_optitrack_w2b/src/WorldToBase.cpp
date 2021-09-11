@@ -1,18 +1,24 @@
 #include <WorldToBase.h>
 #include <stdio.h>
 #include <Eigen/Dense>
-#include <WtoBconfig.h>//include the configuration file
  
 using namespace Eigen;
 using namespace std;
 
 WorldToBase::WorldToBase(): Node("mo_cap_subscriber")
 {
-  //Save the rotation matrix from the Motion frame to the base robot frame
-  this->R_0_B = this->quatToRotm(BASE_QX, BASE_QY, BASE_QZ, BASE_QW);
-  //std::cout << this->R_0_B << std::endl;
-  //Save the offset
-  this->offset << INITIAL_OFFSET_X, INITIAL_OFFSET_Y, INITIAL_OFFSET_Z;
+
+  //Declare the parameters of the node
+  this->declare_parameter<float>("base_qx", 0.0);
+  this->declare_parameter<float>("base_qy", 0.0);
+  this->declare_parameter<float>("base_qz", 0.0);
+  this->declare_parameter<float>("base_qw", 1.0);
+  this->declare_parameter<float>("initial_offset_x", 0.0);
+  this->declare_parameter<float>("initial_offset_y", -0.19);
+  this->declare_parameter<float>("initial_offset_z", 0.0);
+  this->declare_parameter<float>("base_id", 0);
+
+  //Event handler for RigidBody messages
   this->subscription_ = this->create_subscription<mocap_optitrack_interfaces::msg::RigidBodyArray>(
     "rigid_body_topic", 10, std::bind(&WorldToBase::rigid_body_topic_callback, this, _1));
 }
@@ -59,10 +65,10 @@ void WorldToBase::transformPose(const mocap_optitrack_interfaces::msg::RigidBody
   }
 
   //Now that we have the pose of the robot base, compute the transformation matrix from the Motive frame to the robot base frame
+  //TO MODIFY : retreive the parameters!
   //T_0_B.block<3,3>(0,0) = this->R_0_B;
   //T_0_B.block<3,1>(0,3) = P_base+this->offset;
   
-  // Dovrebbe essere invece così...
   T_0_B.block<3,3>(0,0) = R_base;
   T_0_B.block<3,1>(0,3) = P_base;
 
