@@ -4,18 +4,22 @@
 #include <vector>
 #include <NatNetTypes.h>
 
-#include <rclcpp/rclcpp.hpp>
-#include <mocap_optitrack_interfaces/msg/rigid_body_array.hpp>
+#include "rclcpp/rclcpp.hpp"
+#include "mocap_optitrack_interfaces/msg/rigid_body_array.hpp"
 
 
 using namespace std;
 class MoCapPublisher: public rclcpp::Node
 {
-// Private attributes and methods
 private:
+    //Attributes
     rclcpp::Publisher<mocap_optitrack_interfaces::msg::RigidBodyArray>::SharedPtr publisher_;
+    rclcpp::TimerBase::SharedPtr timer_;
 
-// Public attributes and methods
+    //Methods
+    void sendFakeMessage();
+    
+
 public:
     // Definition of the construtors
     MoCapPublisher();

@@ -13,6 +13,6 @@
 #define BASE_QZ 0.0
 #define BASE_QW 0.70710678118
 
-#define BASE_STREAMING_ID 4//ID in Motive of the rigid body associated to the base of the robot
+#define BASE_STREAMING_ID 0//ID in Motive of the rigid body associated to the base of the robot
 
 #endif

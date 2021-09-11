@@ -66,7 +66,7 @@ void WorldToBase::transformPose(const mocap_optitrack_interfaces::msg::RigidBody
   T_0_B.block<3,3>(0,0) = R_base;
   T_0_B.block<3,1>(0,3) = P_base;
 
-  std::cout << T_0_B << std::endl;
+  //std::cout << T_0_B << std::endl;
 
   //The rigid body associated to the base was not found
   if(i_base == -1)
