@@ -1,13 +1,15 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
+import os
+from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
     ld = LaunchDescription()
-    #config = os.path.join(
-    #    get_package_share_directory('ros2_tutorials'),
-    #    'config',
-    #    'params.yaml'
-    #    )
+    print(os.path.abspath(os.path.dirname(__file__)))
+    config = os.path.join(
+        get_package_share_directory('ros2-mocap_optitrack'),
+        )
+    print(config)
     #Create the NatNet client node
     natnet_client = Node(
             package='mocap_optitrack_client',
