@@ -33,5 +33,9 @@ install(TARGETS
   mocap_optitrack_w2b
   DESTINATION lib/${PROJECT_NAME})
 
-
+#Add the configuration file to the binaries
+install(DIRECTORY
+  config
+  DESTINATION share/${PROJECT_NAME}
+)
 ament_package()

@@ -36,9 +36,13 @@ ament_target_dependencies(mocap_optitrack_client rclcpp mocap_optitrack_interfac
 
 #Add all the used libraries to the project
 target_link_libraries(mocap_optitrack_client NatNet)#in the folder ./lib there must be a file libNatNet.so
-
 install(TARGETS 
   mocap_optitrack_client
   DESTINATION lib/${PROJECT_NAME})
 
+#Add the configuration file to the binaries
+install(DIRECTORY
+  config
+  DESTINATION share/${PROJECT_NAME}
+)
 ament_package()
