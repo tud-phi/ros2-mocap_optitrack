@@ -29,7 +29,7 @@ WorldToBase::WorldToBase(): Node("world_to_base")
 //Callback to receive rigid body messages
 void WorldToBase::rigid_body_topic_callback(const mocap_optitrack_interfaces::msg::RigidBodyArray::SharedPtr msg) const
 {
-  RCLCPP_INFO(this->get_logger(), "I heard: ");
+  //RCLCPP_INFO(this->get_logger(), "I heard: ");
   // Transform the pose of all the rigid bodies from the frame of the motion capture system to the base frame of the robot
   transformPose(msg);
 }
@@ -40,22 +40,21 @@ void WorldToBase::transformPose(const mocap_optitrack_interfaces::msg::RigidBody
   Vector3f P, P_base;//P_base is the position of the robot base recorded by Motive
   Vector4f P_1;
   Matrix3f R, R_base;//R_base is the orientation of the robot base recoded by Motive
-  Matrix4f T_0_B;//transformation matrix from the motion capture system to the robot base frame
+  Matrix4f T_0_M;//transformation matrix from the motion capture system to the robot base frame
 
   P_base << 0,0,0;
   R_base << 0,0,0,0,0,0,0,0,0;
-  T_0_B  << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1;
+  T_0_M  << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1;
   P_1 << 0,0,0,1;
 
   int i,i_base = -1;
   int nRB = (int) msg->rigid_bodies.size();
 
+  /*USE THE ROBOT BASE ONLINE*/
   //Retreive the ID of the base frame
   int BASE_STREAMING_ID = -1;
   this->get_parameter("base_id", BASE_STREAMING_ID);
-
   printf("BASE ID : %d\n", BASE_STREAMING_ID);
-  
   // Get the pose of the base of the robot recorded by Motive
   for (i = 0; i < nRB; i++)
   {
@@ -71,17 +70,6 @@ void WorldToBase::transformPose(const mocap_optitrack_interfaces::msg::RigidBody
         break;
       }
   }
-
-  //Now that we have the pose of the robot base, compute the transformation matrix from the Motive frame to the robot base frame
-  //TO MODIFY : retreive the parameters!
-  //T_0_B.block<3,3>(0,0) = this->R_0_B;
-  //T_0_B.block<3,1>(0,3) = P_base+this->offset;
-  
-  T_0_B.block<3,3>(0,0) = R_base;
-  T_0_B.block<3,1>(0,3) = P_base;
-
-  //std::cout << T_0_B << std::endl;
-
   //The rigid body associated to the base was not found
   if(i_base == -1)
   {
@@ -89,7 +77,31 @@ void WorldToBase::transformPose(const mocap_optitrack_interfaces::msg::RigidBody
     //TODO : decide what to do in this case, we just continue the process
   }
 
-  // Iterate through all the rigid bodies
+  // ? : To speed up we can avoid this query but if you change online not working anymore...
+  /*RETREIVE THE POSE OF THE ROBOT BASE IN THE MOTIVE FRAME*/
+  float base_qx, base_qy, base_qz, base_qw, initial_offset_x, initial_offset_y, initial_offset_z; 
+  this->get_parameter("base_qx", base_qx);
+  this->get_parameter("base_qy", base_qy);
+  this->get_parameter("base_qz", base_qz);
+  this->get_parameter("base_qw", base_qw);
+  this->get_parameter("initial_offset_x", initial_offset_x);
+  this->get_parameter("initial_offset_y", initial_offset_y);
+  this->get_parameter("initial_offset_z", initial_offset_z);
+  T_0_M.block<3,3>(0,0) = quatToRotm(base_qx, base_qy, base_qz, base_qw);
+  T_0_M.block<3,1>(0,3) << initial_offset_x, initial_offset_y, initial_offset_z;
+  T_0_M.block<3,1>(0,3) += P_base;
+
+  std::cout << "Transformation matrix from robot base frame to motive : \n";
+  std::cout << T_0_M << std::endl;
+
+  /*Get the transformation matrix from the body frame*/
+  Matrix4f T_M_0; T_M_0 << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1;
+  T_M_0.block<3,3>(0,0) = T_0_M.block<3,3>(0,0).transpose();
+  T_M_0.block<3,1>(0,3) = -T_M_0.block<3,3>(0,0)*T_0_M.block<3,1>(0,3);
+
+  std::cout << T_M_0 << std::endl;
+
+  /*Compute the position of each rigid body in the robot base frame*/
   for (i = 0; i < nRB; i++)
   {
       //Print some information
@@ -105,11 +117,8 @@ void WorldToBase::transformPose(const mocap_optitrack_interfaces::msg::RigidBody
                            msg->rigid_bodies[i].pose_stamped.pose.orientation.w);
       P_1.segment(0,3) = P;//store in P_1 the current position of the marker
       //Compute the position of the point in the robot base frame
-      std::cout << T_0_B.inverse()*P_1 << std::endl;
-      //std::cout << T_0_B*P_1 << std::endl;
-      //Store the position of the point in the message
-
-      //TODO : Process the orientation...
+      std::cout << T_M_0*P_1 << std::endl;
+      //Save the position to resend the message.
   }
 }
 
