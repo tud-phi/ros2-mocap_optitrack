@@ -32,6 +32,21 @@ void WorldToBase::rigid_body_topic_callback(const mocap_optitrack_interfaces::ms
   //RCLCPP_INFO(this->get_logger(), "I heard: ");
   // Transform the pose of all the rigid bodies from the frame of the motion capture system to the base frame of the robot
   transformPose(msg);
+  /*Check the message is changed... (TO REMOVE)*/
+  // int nRB = (int) msg->rigid_bodies.size();
+  // for (int i = 0; i < nRB; i++)
+  // {
+  //     //Print some information
+  //     printf("ID : %ld\n", msg->rigid_bodies[i].id);
+  //     printf("Time stamp : %d(s)---%d(ns)\n", msg->rigid_bodies[i].pose_stamped.header.stamp.sec, msg->rigid_bodies[i].pose_stamped.header.stamp.nanosec);
+      
+  //     //Save the tranformed pose in the message
+  //     printf("Position : (%.4f,%.4f,%.4f)\n", msg->rigid_bodies[i].pose_stamped.pose.position.x, msg->rigid_bodies[i].pose_stamped.pose.position.y, msg->rigid_bodies[i].pose_stamped.pose.position.z);
+  //     printf("Quaternion: (%.4f,%.4f,%.4f,%.4f)\n", msg->rigid_bodies[i].pose_stamped.pose.orientation.x,
+  //                                                   msg->rigid_bodies[i].pose_stamped.pose.orientation.y,
+  //                                                   msg->rigid_bodies[i].pose_stamped.pose.orientation.z,
+  //                                                   msg->rigid_bodies[i].pose_stamped.pose.orientation.w);
+  // }
 }
 
 // Method that transforms the pose of the rigid bodies expressed in the motion capture system into the base frame of the robot
@@ -40,11 +55,12 @@ void WorldToBase::transformPose(const mocap_optitrack_interfaces::msg::RigidBody
   Vector3f P, P_base;//P_base is the position of the robot base recorded by Motive
   Vector4f P_1;
   Matrix3f R, R_base;//R_base is the orientation of the robot base recoded by Motive
-  Matrix4f T_0_M;//transformation matrix from the motion capture system to the robot base frame
+  Matrix4f T_M_0, T_0_P;//transformation matrix from the motion capture system to the robot base frame
 
   P_base << 0,0,0;
   R_base << 0,0,0,0,0,0,0,0,0;
-  T_0_M  << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1;
+  T_M_0  << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1;
+  T_0_P  << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1;
   P_1 << 0,0,0,1;
 
   int i,i_base = -1;
@@ -87,39 +103,52 @@ void WorldToBase::transformPose(const mocap_optitrack_interfaces::msg::RigidBody
   this->get_parameter("initial_offset_x", initial_offset_x);
   this->get_parameter("initial_offset_y", initial_offset_y);
   this->get_parameter("initial_offset_z", initial_offset_z);
-  T_0_M.block<3,3>(0,0) = quatToRotm(base_qx, base_qy, base_qz, base_qw);
-  T_0_M.block<3,1>(0,3) << initial_offset_x, initial_offset_y, initial_offset_z;
-  T_0_M.block<3,1>(0,3) += P_base;
+  T_M_0.block<3,3>(0,0) = quatToRotm(base_qx, base_qy, base_qz, base_qw);
+  T_M_0.block<3,1>(0,3) << initial_offset_x, initial_offset_y, initial_offset_z;
+  T_M_0.block<3,1>(0,3) += P_base;
 
   std::cout << "Transformation matrix from robot base frame to motive : \n";
-  std::cout << T_0_M << std::endl;
-
-  /*Get the transformation matrix from the body frame*/
-  Matrix4f T_M_0; T_M_0 << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1;
-  T_M_0.block<3,3>(0,0) = T_0_M.block<3,3>(0,0).transpose();
-  T_M_0.block<3,1>(0,3) = -T_M_0.block<3,3>(0,0)*T_0_M.block<3,1>(0,3);
-
   std::cout << T_M_0 << std::endl;
 
-  /*Compute the position of each rigid body in the robot base frame*/
+  /*Get the transformation matrix from the body frame*/
+  Matrix4f T_0_M; T_0_M << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1;
+  T_0_M.block<3,3>(0,0) = T_M_0.block<3,3>(0,0).transpose();
+  T_0_M.block<3,1>(0,3) = -T_0_M.block<3,3>(0,0)*T_M_0.block<3,1>(0,3);
+
+  std::cout << T_0_M << std::endl;
+
+  Eigen::Vector4f q;
+  /*Compute the pose of each rigid body in the robot base frame*/
   for (i = 0; i < nRB; i++)
   {
       //Print some information
       printf("ID : %ld\n", msg->rigid_bodies[i].id);
-      //Print the time stamp of the message
       printf("Time stamp : %d(s)---%d(ns)\n", msg->rigid_bodies[i].pose_stamped.header.stamp.sec, msg->rigid_bodies[i].pose_stamped.header.stamp.nanosec);
 
-      // Transform first the position
-      P << msg->rigid_bodies[i].pose_stamped.pose.position.x, msg->rigid_bodies[i].pose_stamped.pose.position.y, msg->rigid_bodies[i].pose_stamped.pose.position.z;
-      R = this->quatToRotm(msg->rigid_bodies[i].pose_stamped.pose.orientation.x,
-                           msg->rigid_bodies[i].pose_stamped.pose.orientation.y,
-                           msg->rigid_bodies[i].pose_stamped.pose.orientation.z,
-                           msg->rigid_bodies[i].pose_stamped.pose.orientation.w);
-      P_1.segment(0,3) = P;//store in P_1 the current position of the marker
-      //Compute the position of the point in the robot base frame
-      std::cout << T_M_0*P_1 << std::endl;
-      //Save the position to resend the message.
+      // Transform the pose
+      T_0_P(0, 3) = msg->rigid_bodies[i].pose_stamped.pose.position.x;
+      T_0_P(1, 3) = msg->rigid_bodies[i].pose_stamped.pose.position.y;
+      T_0_P(2, 3) = msg->rigid_bodies[i].pose_stamped.pose.position.z;
+      T_0_P.block<3,3>(0,0) = this->quatToRotm(msg->rigid_bodies[i].pose_stamped.pose.orientation.x,
+                                               msg->rigid_bodies[i].pose_stamped.pose.orientation.y,
+                                               msg->rigid_bodies[i].pose_stamped.pose.orientation.z,
+                                               msg->rigid_bodies[i].pose_stamped.pose.orientation.w);
+      //Compute the pose of the body in the robot base frame
+      T_0_P = T_0_M*T_0_P;
+      std::cout << T_0_P << std::endl;
+      //Save the tranformed pose in the message
+      msg->rigid_bodies[i].pose_stamped.pose.position.x = T_0_P(0, 3);
+      msg->rigid_bodies[i].pose_stamped.pose.position.y = T_0_P(1, 3);
+      msg->rigid_bodies[i].pose_stamped.pose.position.z = T_0_P(2, 3);
+      q = this->rotmToQuat(T_0_P.block<3,3>(0,0));
+      msg->rigid_bodies[i].pose_stamped.pose.orientation.x = q(0);
+      msg->rigid_bodies[i].pose_stamped.pose.orientation.y = q(1);
+      msg->rigid_bodies[i].pose_stamped.pose.orientation.z = q(2);
+      msg->rigid_bodies[i].pose_stamped.pose.orientation.w = q(3);
+      std::cout << "Check coorrect matrix..." << std::endl;
+      std::cout << T_0_P.block<3,3>(0,0) - this->quatToRotm(q(0),q(1),q(2),q(3)) << std::endl;
   }
+
 }
 
 //Save in R the rotation represented by the unit quaternion [qx,qy,qz,qw]
@@ -137,6 +166,28 @@ Eigen::Matrix3f WorldToBase::quatToRotm(float qx, float qy, float qz, float qw) 
   R(2,2) = 2*(pow(qw,2)+pow(qz,2))-1;
   return R;
 }
+
+//Conversion from rotation matrix to unit quaternion
+Eigen::Vector4f WorldToBase::rotmToQuat(Eigen::Matrix3f R) const
+{
+  Vector4f q;
+  float x;
+  //
+  x = R(2,1)- R(1,2);
+  q(0) = ( (x >= 0) ? 1 : -1)*sqrt(R(0,0)-R(1,1)-R(2,2)+1);
+  //
+  x = R(0,2)- R(2,0);
+  q(1) = ( (x >= 0) ? 1 : -1)*sqrt(R(1,1)-R(2,2)-R(0,0)+1);
+  //
+  x = R(1,0)- R(0,1);
+  q(2) = ( (x >= 0) ? 1 : -1)*sqrt(R(2,2)-R(1,1)-R(0,0)+1);
+  //
+  q(3) = sqrt(R(0,0)+R(1,1)+R(2,2)+1);
+  //
+  q = 0.5*q;
+  return q;
+}
+
 
 // Main method
 int main(int argc, char ** argv)
