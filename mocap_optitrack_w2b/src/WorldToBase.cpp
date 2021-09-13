@@ -41,7 +41,6 @@ void WorldToBase::rigid_body_topic_callback(const mocap_optitrack_interfaces::ms
 {
   //RCLCPP_INFO(this->get_logger(), "I heard: ");
   // Transform the pose of all the rigid bodies from the frame of the motion capture system to the base frame of the robot
-  // Publish the message with the modified pose
   transformPoseAndSend(msg);
 }
 
