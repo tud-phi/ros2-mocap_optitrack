@@ -23,8 +23,6 @@ include_directories(include/NatNet)
 #Include the headers for the NatNet client
 include_directories(include/MoCapNatNetClient)
 
-#Import the interfaces for the custom messages
-
 #Add the directory where the libraries are located
 link_directories(${CMAKE_SOURCE_DIR}/lib)
 

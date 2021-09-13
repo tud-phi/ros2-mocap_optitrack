@@ -18,8 +18,7 @@ find_package(rclcpp REQUIRED)
 find_package(mocap_optitrack_interfaces REQUIRED)
 
 #Include the headers
-include_directories(include include/Eigen)
-
+include_directories(include /usr/local/include/eigen3)
 #Create the executables
 add_executable(mocap_optitrack_w2b src/WorldToBase.cpp)
 ament_target_dependencies(mocap_optitrack_w2b rclcpp mocap_optitrack_interfaces)

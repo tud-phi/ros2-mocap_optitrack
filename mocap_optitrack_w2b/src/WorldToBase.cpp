@@ -1,6 +1,6 @@
 #include <WorldToBase.h>
 #include <stdio.h>
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
  
 using namespace Eigen;
 using namespace std;

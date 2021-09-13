@@ -5,7 +5,7 @@
 #include <memory>
 #include "rclcpp/rclcpp.hpp"
 #include "mocap_optitrack_interfaces/msg/rigid_body_array.hpp"
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 
 using std::placeholders::_1;
 using namespace std;
