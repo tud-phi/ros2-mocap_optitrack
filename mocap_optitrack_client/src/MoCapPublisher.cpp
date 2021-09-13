@@ -22,8 +22,8 @@ MoCapPublisher::MoCapPublisher(): Node("natnet_client")
   this->declare_parameter<std::string>("server_address", "10.125.37.2");
   this->declare_parameter<int>("connection_type", 0);
   this->declare_parameter<std::string>("multi_cast_address", "239.255.42.99");
-  this->declare_parameter<int>("server_command_port", 1510);
-  this->declare_parameter<int>("server_data_port", 1511);
+  this->declare_parameter<uint16_t>("server_command_port", 1510);
+  this->declare_parameter<uint16_t>("server_data_port", 1511);
   this->declare_parameter<std::string>("pub_topic", "rigid_body_topic");
   
   //Create the publisher
@@ -35,8 +35,7 @@ MoCapPublisher::MoCapPublisher(): Node("natnet_client")
   this->t_start = high_resolution_clock::now();//get the current time
 
   //Just for testing purposes send make messages every 500ms
-  this->timer_ = this->create_wall_timer(
-      500ms, std::bind(&MoCapPublisher::sendFakeMessage, this));
+  //this->timer_ = this->create_wall_timer(500ms, std::bind(&MoCapPublisher::sendFakeMessage, this));
 }
 
 // Method that send over the ROS network the data of a rigid body
@@ -140,16 +139,16 @@ std::string MoCapPublisher::getMulticastAddress()
   return addr_;
 }
 
-int MoCapPublisher::getServerCommandPort()
+uint16_t MoCapPublisher::getServerCommandPort()
 {
-  int port_;
+  uint16_t port_;
   this->get_parameter("server_command_port", port_);
   return port_;
 }
 
-int MoCapPublisher::getServerDataPort()
+uint16_t MoCapPublisher::getServerDataPort()
 {
-  int port_;
+  uint16_t port_;
   this->get_parameter("server_data_port", port_);
   return port_;
 }
@@ -167,15 +166,15 @@ int main(int argc, char ** argv)
   //Create the ROS2 publisher
   auto mocapPub = std::make_shared<MoCapPublisher>();
   //Create the MoCapNatNetClient
-  //MoCapNatNetClient* c = new MoCapNatNetClient(mocapPub.get());
+  MoCapNatNetClient* c = new MoCapNatNetClient(mocapPub.get());
   // Try to connect the client 
-  //int retCode = c->connect();
-  //printf("Return code is : %d", retCode);
-  //if (retCode != 0)
-  //{
-  //  printf("Error, exiting.");
-  //  return retCode;
-  //}
+  int retCode = c->connect();
+  printf("Return code is : %d\n", retCode);
+  if (retCode != 0)
+  {
+    printf("Error, exiting.\n");
+    return retCode;
+  }
   // Ready to receive marker stream!
 	//printf("\nClient is connected to server and listening for data...\n");
   printf("Starting the publisher...\n");

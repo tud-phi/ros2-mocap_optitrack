@@ -8,5 +8,5 @@ world_to_base:
       initial_offset_x: 0.0
       initial_offset_y: -0.19
       initial_offset_z: 0.0
-      base_id: 0
+      base_id: 4
       sub_topic: "rigid_body_topic"

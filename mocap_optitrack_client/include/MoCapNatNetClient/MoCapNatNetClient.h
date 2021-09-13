@@ -25,6 +25,9 @@ private:
     sDataDescriptions* pDataDefs;
     int g_analogSamplesPerMocapFrame = 0;
     MoCapPublisher* moCapPublisher;
+    //const char* server_address;
+    //const char* multicast_address;
+    
     
     // Method to get the data description from the server
     void getDataDescription();

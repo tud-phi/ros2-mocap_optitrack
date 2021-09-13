@@ -33,8 +33,8 @@ public:
     std::string getServerAddress();
     int getConnectionType();
     std::string getMulticastAddress();
-    int getServerCommandPort();
-    int getServerDataPort();
+    uint16_t getServerCommandPort();
+    uint16_t getServerDataPort();
     
     // Setters
     

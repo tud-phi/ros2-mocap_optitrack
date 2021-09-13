@@ -10,14 +10,23 @@ MoCapNatNetClient::MoCapNatNetClient(MoCapPublisher* _moCapPublisher)
 {
     // Save the ROS2 publisher to send messages to this
     this->moCapPublisher = _moCapPublisher;
-
+    
     // Create the connection parameters, retreiving the data from the ROS2 node
     if (moCapPublisher->getConnectionType() == 0) g_connectParams.connectionType = ConnectionType_Multicast;
     else g_connectParams.connectionType = ConnectionType_Unicast;
-    g_connectParams.serverAddress = moCapPublisher->getServerAddress().c_str();
-    g_connectParams.multicastAddress = moCapPublisher->getMulticastAddress().c_str();
+
     g_connectParams.serverDataPort = moCapPublisher->getServerDataPort();
     g_connectParams.serverCommandPort = moCapPublisher->getServerCommandPort();
+
+    std::string serverAddress_s = moCapPublisher->getServerAddress();
+    char* serverAddress = (char*) malloc(serverAddress_s.length()*sizeof(char));
+    strcpy(serverAddress, serverAddress_s.c_str());
+    g_connectParams.serverAddress = (const char*) serverAddress;
+
+    std::string multiCastAddress_s = moCapPublisher->getMulticastAddress();
+    char* multiCastAddress = (char*) malloc(multiCastAddress_s.length()*sizeof(char));
+    strcpy(multiCastAddress, multiCastAddress_s.c_str());
+    g_connectParams.multicastAddress = (const char*) multiCastAddress;
     
     // Struct where the data description will be saved
     pDataDefs = NULL;
