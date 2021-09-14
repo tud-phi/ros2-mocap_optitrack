@@ -5,6 +5,7 @@
 #include "mocap_optitrack_interfaces/msg/configuration_array.hpp"
 #include "mocap_optitrack_interfaces/msg/rigid_body_array.hpp"
 #include <InverseKinematics.h>
+#include <stdio.h>
 
 using std::placeholders::_1;
 class InverseKinematicsNode: public rclcpp::Node

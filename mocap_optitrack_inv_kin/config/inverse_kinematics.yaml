@@ -2,7 +2,7 @@
 inverse_kinematics:
   ros__parameters:
       base_id: 4 #motive ID of the robot base
-      ring_ids: [1, 2, 3] #motive IDs of the rings of each segment
+      ring_ids: [1, 2, 3, 4] #motive IDs of the rings of each segment
       ring_ls: [1.0, 1.0, 1.0] #distance at rest (straight) of each ring from the base of the segment
       ring_ds: [2.0, 2.0, 2.0]
       sub_topic: "rigid_body_baseframe_topic" 

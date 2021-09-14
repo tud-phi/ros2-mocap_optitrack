@@ -1,5 +1,4 @@
 #include <InverseKinematicsNode.h>
-#include <stdio.h>
 
 //Class constructor
 InverseKinematicsNode::InverseKinematicsNode(): Node("inverse_kinematics")
@@ -43,8 +42,9 @@ void InverseKinematicsNode::rigid_body_topic_callback(const mocap_optitrack_inte
     std::vector<double> ds;
     this->get_parameter("ring_ds", ds);
 
+    //TO DO : add a check that (ring_ids.size() - 1) is the same as the number of rigid bodies
     //Call the inverse kinematics to get the configuration
-    this->ik.getConfiguration(msg, IDs, ls, ds);
+    Eigen::VectorXf q = this->ik.getConfiguration(msg, IDs, ls, ds);
 }
 
 int main(int argc, char ** argv)
