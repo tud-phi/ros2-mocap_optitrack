@@ -25,7 +25,6 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
             //TODO : Remove the object since it is not required anymore
         }
     }
-
     //Return the configuration
     return q;
 }
