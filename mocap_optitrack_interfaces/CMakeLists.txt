@@ -27,6 +27,8 @@ find_package(std_msgs REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/RigidBody.msg"
   "msg/RigidBodyArray.msg"
+  "msg/Configuration.msg"
+  "msg/ConfigurationArray.msg"
   DEPENDENCIES builtin_interfaces geometry_msgs std_msgs
  )
 

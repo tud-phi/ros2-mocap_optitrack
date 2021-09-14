@@ -1,0 +1,6 @@
+#Configuration file for inverse_kinematics_node
+inverse_kinematics:
+  ros__parameters:
+      base_id: 4 #motive ID of the robot base
+      sub_topic: "rigid_body_baseframe_topic" 
+      pub_topic: "configuration_topic" #topic where the configuration vector of the robot is published
