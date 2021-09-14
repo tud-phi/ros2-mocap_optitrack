@@ -16,5 +16,19 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)#publisher
 find_package(mocap_optitrack_interfaces REQUIRED)
 
+include_directories(include)
 
+#Create the executables
+add_executable(mocap_optitrack_inv_kin src/InverseKinematicsNode.cpp src/InverseKinematics.cpp)
+ament_target_dependencies(mocap_optitrack_inv_kin rclcpp mocap_optitrack_interfaces)
+
+install(TARGETS 
+  mocap_optitrack_inv_kin
+  DESTINATION lib/${PROJECT_NAME})
+
+#Add the configuration file to the binaries
+install(DIRECTORY
+  config
+  DESTINATION share/${PROJECT_NAME}
+)
 ament_package()

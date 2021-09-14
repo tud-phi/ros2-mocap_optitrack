@@ -17,16 +17,14 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(mocap_optitrack_interfaces REQUIRED)
 
-#Include the headers
-include_directories(include /usr/local/include/eigen3)
+#Include the headers.
+#NOTE : libeiegen3-dev is assumed to be installed in the system
+include_directories(include)
+
 #Create the executables
 add_executable(mocap_optitrack_w2b src/WorldToBase.cpp)
 ament_target_dependencies(mocap_optitrack_w2b rclcpp mocap_optitrack_interfaces)
 
-#install(DIRECTORY
-#  config
-#  DESTINATION share/${PROJECT_NAME}
-#)
 
 install(TARGETS 
   mocap_optitrack_w2b
