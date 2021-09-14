@@ -5,6 +5,9 @@
 InverseKinematicsNode::InverseKinematicsNode(): Node("inverse_kinematics")
 {
     //Declare the parameters of the node
+    this->declare_parameter("ring_ids");
+    this->declare_parameter("ring_ls");
+    this->declare_parameter("ring_ds");
     this->declare_parameter<int>("base_id", 0);
     this->declare_parameter<std::string>("sub_topic", "rigid_body_baseframe_topic");
     this->declare_parameter<std::string>("pub_topic", "configuration_topic");
@@ -32,6 +35,16 @@ InverseKinematicsNode::InverseKinematicsNode(): Node("inverse_kinematics")
 void InverseKinematicsNode::rigid_body_topic_callback(const mocap_optitrack_interfaces::msg::RigidBodyArray::SharedPtr msg) const
 {
     printf("Receceived message on rigid bodies....\n");
+    //Retreive the paramters and perform the inverse kinematics
+    std::vector<long int> IDs;
+    this->get_parameter("ring_ids", IDs);
+    std::vector<double> ls;
+    this->get_parameter("ring_ls", ls);
+    std::vector<double> ds;
+    this->get_parameter("ring_ds", ds);
+
+    //Call the inverse kinematics to get the configuration
+    this->ik.getConfiguration(msg, IDs, ls, ds);
 }
 
 int main(int argc, char ** argv)

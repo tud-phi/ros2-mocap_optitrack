@@ -29,7 +29,20 @@ def generate_launch_description():
             name='world_to_base',
             parameters = [config]
         )
+    #Create the inverse kinematics node
+    config = os.path.join(
+        get_package_share_directory('mocap_optitrack_inv_kin'),
+        'config',
+        'inverse_kinematics.yaml'
+        )
+    inverse_kinematics = Node(
+            package='mocap_optitrack_inv_kin',
+            executable='mocap_optitrack_inv_kin',
+            name='inverse_kinematics',
+            parameters = [config]
+        )
     #Add the nodes to the launch description and return it
     ld.add_action(natnet_client)
     ld.add_action(world_to_base)
+    ld.add_action(inverse_kinematics)
     return ld
