@@ -7,8 +7,9 @@ InverseKinematics::InverseKinematics()
 /*Main method to get the configuration vector*/
 Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interfaces::msg::RigidBodyArray::SharedPtr &msg, 
                           std::vector<long int> &ring_ids,
-                          std::vector<double> &ring_ls,
-                          std::vector<double> &ring_ds) const
+                          std::vector<double> &ls,
+                          std::vector<double> &ds,
+                          std::vector<double> &Ls) const
 {
     //Allocate the vector of configuration variables to be returned
     Eigen::VectorXf q(ring_ids.size()*3);
@@ -19,7 +20,7 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
     for (auto& i : ring_ids)
     {
         pos = this->getRingPosition(msg, nRB, i);
-        if (pos == -1){printf("Error...\n");}else{
+        if (pos == -1){printf("Error: ring not found.\n");}else{
             //Compute the inverse kinematics
             
             //TODO : Remove the object since it is not required anymore

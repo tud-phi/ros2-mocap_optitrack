@@ -2,8 +2,9 @@
 inverse_kinematics:
   ros__parameters:
       base_id: 4 #motive ID of the robot base
-      ring_ids: [1, 2, 3, 4] #motive IDs of the rings of each segment
-      ring_ls: [1.0, 1.0, 1.0] #distance at rest (straight) of each ring from the base of the segment
-      ring_ds: [2.0, 2.0, 2.0]
+      ring_ids: [1, 2, 3, 4] #motive IDs of the rings of each segment, ordered from the robot base to te tip
+      ring_ls: [1.0, 1.0, 1.0] #distance at rest of each ring from the base of the corresponding segment, ordered from robot base to the tip
+      ring_ds: [2.0, 2.0, 2.0] #diameter of each segment, ordered from the robot base to the tip
+      segment_ls: [1.0, 1.0, 1.0] #length of each segment, ordered from the robot base to the tip
       sub_topic: "rigid_body_baseframe_topic" 
       pub_topic: "configuration_topic" #topic where the configuration vector of the robot is published

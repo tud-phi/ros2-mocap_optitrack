@@ -19,8 +19,9 @@ public:
 
     Eigen::VectorXf getConfiguration(const mocap_optitrack_interfaces::msg::RigidBodyArray::SharedPtr &msg, 
                           std::vector<long int> &ring_ids,
-                          std::vector<double> &ring_ls,
-                          std::vector<double> &ring_ds) const;
+                          std::vector<double> &ls,
+                          std::vector<double> &ds,
+                          std::vector<double> &Ls) const;
 };
 
 #endif

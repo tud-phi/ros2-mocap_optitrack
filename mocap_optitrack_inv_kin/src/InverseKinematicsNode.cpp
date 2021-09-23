@@ -7,6 +7,7 @@ InverseKinematicsNode::InverseKinematicsNode(): Node("inverse_kinematics")
     this->declare_parameter("ring_ids");
     this->declare_parameter("ring_ls");
     this->declare_parameter("ring_ds");
+    this->declare_parameter("segment_ls");
     this->declare_parameter<int>("base_id", 0);
     this->declare_parameter<std::string>("sub_topic", "rigid_body_baseframe_topic");
     this->declare_parameter<std::string>("pub_topic", "configuration_topic");
@@ -41,10 +42,12 @@ void InverseKinematicsNode::rigid_body_topic_callback(const mocap_optitrack_inte
     this->get_parameter("ring_ls", ls);
     std::vector<double> ds;
     this->get_parameter("ring_ds", ds);
+    std::vector<double> Ls;
+    this->get_parameter("segment_ls", Ls);
 
     //TO DO : add a check that (ring_ids.size() - 1) is the same as the number of rigid bodies
     //Call the inverse kinematics to get the configuration
-    Eigen::VectorXf q = this->ik.getConfiguration(msg, IDs, ls, ds);
+    Eigen::VectorXf q = this->ik.getConfiguration(msg, IDs, ls, ds, Ls);
 }
 
 int main(int argc, char ** argv)
