@@ -17,6 +17,7 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
     std::vector<mocap_optitrack_interfaces::msg::RigidBody> RBs = getSorteredBodies(msg, ring_ids);
 
     /*Run the inverse kinematics*/
+
     //Allocate the vector of configuration variables to be returned
     Eigen::VectorXf q(ring_ids.size()*3);
 
@@ -62,7 +63,7 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
                                                    (q(k)*q(k+1)/Delta_i2*(ci-1))  , 1+(pow(q(k+1),2)/Delta_i2)*(ci-1), q(k+1)/Delta_i*si, scf*q(k+1)*(1-ci),
                                                    -q(k)/Delta_i*si               , -q(k+1)/Delta_i*si               , ci               , scf*Delta_i*si,
                                                    0                              , 0                                , 0                , 1).finished();
-        //Update the variables
+        //Update the itertor for the configuration vector
         k += 3;
     }
     
