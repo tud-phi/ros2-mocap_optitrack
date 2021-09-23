@@ -7,7 +7,6 @@ using namespace std;
 
 WorldToBase::WorldToBase(): Node("world_to_base")
 {
-
   //Declare the parameters of the node
   this->declare_parameter<float>("base_qx", 0.0);
   this->declare_parameter<float>("base_qy", 0.0);
