@@ -18,15 +18,15 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
 
     /*Run the inverse kinematics*/
 
-    //Allocate the vector of configuration variables to be returned
-    Eigen::VectorXf q(ring_ids.size()*3);
-
     //Initialize the variables
     int i, k = 0;
-    int nRB = (int) msg->rigid_bodies.size();//number of rigid bodies
+    int nRB = (int) RBs.size();//number of rigid bodies
+    //Allocate the vector of configuration variables to be returned
+    Eigen::VectorXf q(nRB*3);
+    //Auxiliary variables
     Eigen::Matrix3f R_i_1_ri;
     Eigen::Vector3f t_i_1_ri;
-    Eigen::Matrix3f T_0_i_1;
+    Eigen::Matrix4f T_0_i_1;
     T_0_i_1 << 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1;//Initialize to the identity matrix. TODO: clean the code and make with Identity function of eigen
     double D_c_ri, delta_L_ri, Delta_x_ri, Delta_y_ri, L_factor, Delta_i, Delta_i2, ci, si, scf;
     
@@ -38,17 +38,12 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
                                                                         RBs[i].pose_stamped.pose.orientation.z,
                                                                         RBs[i].pose_stamped.pose.orientation.w);
         t_i_1_ri = (T_0_i_1.inverse()*(Eigen::VectorXf(4) << RBs[i].pose_stamped.pose.position.x, RBs[i].pose_stamped.pose.position.y, RBs[i].pose_stamped.pose.position.z, 1).finished()).head(3);
-
         //Compute the configuration
         L_factor = Ls[i]/ls[i];
-
-        delta_L_ri = t_i_1_ri(3)*(ds[i]*acos(R_i_1_ri(3,3)))/(sin(acos(R_i_1_ri(3,3))))-ls[i];
-
-        D_c_ri = ds[i]/(ls[i]+delta_L_ri)*(pow(acos(R_i_1_ri(3,3)), 2)/(R_i_1_ri(3,3)-1));
-
-        Delta_x_ri = t_i_1_ri(1)*D_c_ri;
-        
-        Delta_y_ri = t_i_1_ri(2)*D_c_ri;
+        delta_L_ri = t_i_1_ri(2)*(ds[i]*acos(R_i_1_ri(2,2)))/(sin(acos(R_i_1_ri(2,2))))-ls[i];
+        D_c_ri = ds[i]/(ls[i]+delta_L_ri)*(pow(acos(R_i_1_ri(2,2)), 2)/(R_i_1_ri(2,2)-1));
+        Delta_x_ri = t_i_1_ri(0)*D_c_ri;
+        Delta_y_ri = t_i_1_ri(1)*D_c_ri;
 
         q(k)   = L_factor*Delta_x_ri;
         q(k+1) = L_factor*Delta_y_ri;
@@ -68,6 +63,8 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
         k += 3;
     }
     
+    std::cout << q << std::endl;
+
     //Return the configuration
     return q;
 }
@@ -95,7 +92,7 @@ std::vector<mocap_optitrack_interfaces::msg::RigidBody> InverseKinematics::getSo
     {
         //Get the position of current ring
         i = this->getRingPosition(msg, nRB, pos);
-        if (pos == -1){printf("Error: ring not found.\n");}else{//TO DO: implement the error as a ROS2 log
+        if (i == -1){printf("Error: ring not found.\n");}else{//TO DO: implement the error as a ROS2 log
             //Compute the inverse kinematics
             RBs.push_back(msg->rigid_bodies[i]);
         }

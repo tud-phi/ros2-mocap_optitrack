@@ -33,6 +33,9 @@ WorldToBase::WorldToBase(): Node("world_to_base")
   char* pub_topic = (char*) malloc(pub_topic_.length()*sizeof(char));
   strcpy(pub_topic, pub_topic_.c_str());
   this->publisher_ = this->create_publisher<mocap_optitrack_interfaces::msg::RigidBodyArray>(pub_topic, 10);
+
+  //Log info about creation
+  RCLCPP_INFO(this->get_logger(), "Created world to base node.\n");
 }
 
 //Callback to receive rigid body messages

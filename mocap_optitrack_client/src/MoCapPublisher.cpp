@@ -36,6 +36,9 @@ MoCapPublisher::MoCapPublisher(): Node("natnet_client")
 
   //Just for testing purposes send make messages every 500ms
   //this->timer_ = this->create_wall_timer(500ms, std::bind(&MoCapPublisher::sendFakeMessage, this));
+
+  //Log info about creation
+  RCLCPP_INFO(this->get_logger(), "Created MoCap publisher node.\n");
 }
 
 // Method that send over the ROS network the data of a rigid body
@@ -169,28 +172,14 @@ int main(int argc, char ** argv)
   MoCapNatNetClient* c = new MoCapNatNetClient(mocapPub.get());
   // Try to connect the client 
   int retCode = c->connect();
-  printf("Return code is : %d\n", retCode);
   if (retCode != 0)
   {
-    printf("Error, exiting.\n");
     return retCode;
   }
-  // Ready to receive marker stream!
-	//printf("\nClient is connected to server and listening for data...\n");
-  printf("Starting the publisher...\n");
+  // Ready to receive marker stream
   rclcpp::spin(mocapPub);
-
-	//bool bExit = false;
-  //char choice;
-	//while ( !bExit )
-	//{
-  //  scanf(" %c", &choice);
-	//	if (choice == 'q') bExit = true;
-  //}
-
   // Delete all the objects created
-  //delete c;
+  delete c;
   rclcpp::shutdown();//delete the ROS2 nodes
-
   return 0;
 }

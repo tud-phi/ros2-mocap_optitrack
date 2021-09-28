@@ -29,12 +29,15 @@ InverseKinematicsNode::InverseKinematicsNode(): Node("inverse_kinematics")
 
     //Create the node responsible of handling the inverse kinematics
     this->ik = InverseKinematics();
+
+    //Log data
+    RCLCPP_INFO(this->get_logger(), "Created IK node. Listening for incoming data...\n");
 }
 
 //Topic to receive the message of rigid bodies
 void InverseKinematicsNode::rigid_body_topic_callback(const mocap_optitrack_interfaces::msg::RigidBodyArray::SharedPtr msg) const
 {
-    printf("Receceived message on rigid bodies....\n");
+    RCLCPP_INFO(this->get_logger(), "Receceived message on rigid bodies...\n");
     //Retreive the parameters and perform the inverse kinematics
     std::vector<long int> IDs;
     this->get_parameter("ring_ids", IDs);

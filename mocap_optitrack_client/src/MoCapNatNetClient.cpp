@@ -62,7 +62,7 @@ int MoCapNatNetClient::connect()
     // Print version info
     unsigned char ver[4];
     NatNet_GetVersion(ver);
-    printf("NatNet Sample Client (NatNet ver. %d.%d.%d.%d)\n", ver[0], ver[1], ver[2], ver[3]);
+    RCLCPP_INFO(this->moCapPublisher->get_logger(), "NatNet Sample Client (NatNet ver. %d.%d.%d.%d)\n", ver[0], ver[1], ver[2], ver[3]);
 
     // Connect the client to the server
     retCode = this->Connect( g_connectParams );
@@ -73,7 +73,7 @@ int MoCapNatNetClient::connect()
     ret = this->GetServerDescription( &g_serverDescription );
     if ( ret != ErrorCode_OK || ! g_serverDescription.HostPresent )
     {
-        printf("Unable to connect to server. Host not present. Exiting.");
+        RCLCPP_ERROR(this->moCapPublisher->get_logger(), "Unable to connect, exiting...\n");
         return 1;
     }
     printf("[SampleClient] Server application info:\n");
