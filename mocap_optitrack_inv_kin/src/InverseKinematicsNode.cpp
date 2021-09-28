@@ -35,7 +35,7 @@ InverseKinematicsNode::InverseKinematicsNode(): Node("inverse_kinematics")
 void InverseKinematicsNode::rigid_body_topic_callback(const mocap_optitrack_interfaces::msg::RigidBodyArray::SharedPtr msg) const
 {
     printf("Receceived message on rigid bodies....\n");
-    //Retreive the paramters and perform the inverse kinematics
+    //Retreive the parameters and perform the inverse kinematics
     std::vector<long int> IDs;
     this->get_parameter("ring_ids", IDs);
     std::vector<double> ls;
