@@ -25,18 +25,18 @@ MoCapPublisher::MoCapPublisher(): Node("natnet_client")
   this->declare_parameter<uint16_t>("server_command_port", 1510);
   this->declare_parameter<uint16_t>("server_data_port", 1511);
   this->declare_parameter<std::string>("pub_topic", "rigid_body_topic");
-  
+  //
   //Create the publisher
   std::string topic_;
   this->get_parameter("pub_topic", topic_);
   this->publisher_ = this->create_publisher<mocap_optitrack_interfaces::msg::RigidBodyArray>(topic_.c_str(), 10);
-  
+  //
   //Get the current time for the timestamp of the messages
   this->t_start = high_resolution_clock::now();//get the current time
-
+  //
   //Just for testing purposes send make messages every 500ms
   //this->timer_ = this->create_wall_timer(500ms, std::bind(&MoCapPublisher::sendFakeMessage, this));
-
+  //
   //Log info about creation
   RCLCPP_INFO(this->get_logger(), "Created MoCap publisher node.\n");
 }
@@ -47,16 +47,14 @@ void MoCapPublisher::sendRigidBodyMessage(sRigidBodyData* bodies, int nRigidBodi
   //Instanciate variables
   mocap_optitrack_interfaces::msg::RigidBodyArray msg;
   high_resolution_clock::time_point t_current;
-  //duration<double> time_span_s, time_span_ns;
-  
   // Log
-  printf("Sending message containing %d Rigid Bodies.\n\n", nRigidBodies);
+  RCLCPP_INFO(get_logger(), "Sending message containing %d Rigid Bodies.\n\n", nRigidBodies);
   // Loop over all the rigid bodies
   for(int i=0; i < nRigidBodies; i++)
   {
-    printf("Rigid Body [ID=%d  Error=%3.2f  Valid=%d]\n", bodies[i].ID, bodies[i].MeanError, bodies[i].params & 0x01);
-    printf("\tx\ty\tz\tqx\tqy\tqz\tqw\n");
-    printf("\t%3.5f\t%3.5f\t%3.5f\t%3.2f\t%3.2f\t%3.2f\t%3.2f\n",
+    RCLCPP_INFO(this->get_logger(), "Rigid Body [ID=%d  Error=%3.2f  Valid=%d]\n", bodies[i].ID, bodies[i].MeanError, bodies[i].params & 0x01);
+    RCLCPP_INFO(this->get_logger(), "\tx\ty\tz\tqx\tqy\tqz\tqw\n");
+    RCLCPP_INFO(this->get_logger(), "\t%3.5f\t%3.5f\t%3.5f\t%3.2f\t%3.2f\t%3.2f\t%3.2f\n",
       bodies[i].x,
       bodies[i].y,
       bodies[i].z,
@@ -64,7 +62,7 @@ void MoCapPublisher::sendRigidBodyMessage(sRigidBodyData* bodies, int nRigidBodi
       bodies[i].qy,
       bodies[i].qz,
       bodies[i].qw);
-
+      //
       //Create the rigid body message
       mocap_optitrack_interfaces::msg::RigidBody rb;
       rb.id = bodies[i].ID;
@@ -77,15 +75,15 @@ void MoCapPublisher::sendRigidBodyMessage(sRigidBodyData* bodies, int nRigidBodi
       rb.pose_stamped.pose.orientation.y = bodies[i].qy;
       rb.pose_stamped.pose.orientation.z = bodies[i].qz;
       rb.pose_stamped.pose.orientation.w = bodies[i].qw;
-
+      //
       // Add the time stamp information both in seconds and nanoseconds
       t_current = high_resolution_clock::now();
       auto time_span_s  = duration_cast<seconds>(t_current - this->t_start);
       auto time_span_ns = duration_cast<nanoseconds>(t_current - this->t_start);
-
+      //
       rb.pose_stamped.header.stamp.sec = time_span_s.count();
       rb.pose_stamped.header.stamp.nanosec = time_span_ns.count();
-
+      //
       // Add the current rigid body to the array of rigid bodies
       msg.rigid_bodies.push_back(rb);
   }
@@ -118,8 +116,6 @@ void MoCapPublisher::sendFakeMessage()
     //Free the rigid bodies
     free(bodies);
 }
-
-
 
 std::string MoCapPublisher::getServerAddress()
 {

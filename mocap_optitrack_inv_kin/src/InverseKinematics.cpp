@@ -5,6 +5,7 @@
 
 InverseKinematics::InverseKinematics()
 {
+    //this->IKNode = IKNode_;
 }
 
 /*Main method to get the configuration vector*/
@@ -16,9 +17,9 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
 {
     //Sort the rigid bodies in the message so that its all consistent with the parameters
     std::vector<mocap_optitrack_interfaces::msg::RigidBody> RBs = getSorteredBodies(msg, ring_ids);
-
+    //
     /*Run the inverse kinematics*/
-
+    //
     //Initialize the variables
     int i, k = 0;
     int nRB = (int) RBs.size();//number of rigid bodies
@@ -31,7 +32,7 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
     T_0_i_1 << 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1;//Initialize to the identity matrix. TODO: clean the code and make with Identity function of eigen
     double D_c_ri, delta_L_ri, Delta_x_ri, Delta_y_ri, L_factor, Delta_i, Delta_i2, ci, si, scf;
     float eps = std::numeric_limits<float>::epsilon();
-    
+    //
     //Run the IK
     for (i = 0; i < nRB; i++ )
     {
@@ -91,7 +92,7 @@ int InverseKinematics::getRingPosition(const mocap_optitrack_interfaces::msg::Ri
         if ( msg->rigid_bodies[i].id == ID) return i;
     }
     //ID not found
-    printf("ID [%d] not found in the message.\n", ID);
+    //RCLCPP_ERROR(this->IKNode->get_logger(), "ID [%d] not found in the message.\n", ID);
     return -1;
 }
 

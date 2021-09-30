@@ -58,7 +58,7 @@ public:
     // Getters
     sServerDescription getServerDescription();
     int getAnalogSamplesPerMocapFrame();
-
+    MoCapPublisher* getPublisher();//returns the Ros2 publisher
     // Setters
 
     //Methods to forward messages to the ROS2 system

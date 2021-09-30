@@ -1,3 +1,6 @@
+# Define RCLCPP_LOG_MIN_SEVERITY=RCLCPP_LOG_MIN_SEVERITY_[DEBUG|INFO|WARN|ERROR|FATAL] in your build options to compile out anything below that severity. Use RCLCPP_LOG_MIN_SEVERITY_NONE to compile out all macros.
+add_compile_definitions(RCLCPP_LOG_MIN_SEVERITY=RCLCPP_LOG_MIN_SEVERITY_DEBUG)
+
 cmake_minimum_required(VERSION 3.5)
 project(mocap_optitrack_w2b)
 
@@ -25,7 +28,6 @@ include_directories(include)
 add_executable(mocap_optitrack_w2b src/WorldToBase.cpp)
 ament_target_dependencies(mocap_optitrack_w2b rclcpp mocap_optitrack_interfaces)
 
-
 install(TARGETS 
   mocap_optitrack_w2b
   DESTINATION lib/${PROJECT_NAME})
@@ -35,4 +37,6 @@ install(DIRECTORY
   config
   DESTINATION share/${PROJECT_NAME}
 )
+
+
 ament_package()
