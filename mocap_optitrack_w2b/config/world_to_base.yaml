@@ -2,12 +2,12 @@
 world_to_base:
   ros__parameters:
       #Orientation of the robot base w.r.t. Motive Frame as unit quaternion
-      base_qx: 0.0
-      base_qy: 0.707106781
-      base_qz: 0.707106781
-      base_qw: 0.0
+      base_qx: -0.7071068 
+      base_qy: 0.0
+      base_qz: 0.0
+      base_qw: 0.7071068
       initial_offset_x: 0.0
-      initial_offset_y: -0.019 #-0.19
+      initial_offset_y: -0.019 #unit of measures are in [m]
       initial_offset_z: 0.0
       base_id: 4 #motive ID of the robot base
       sub_topic: "rigid_body_topic"

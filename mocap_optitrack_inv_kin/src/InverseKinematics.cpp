@@ -30,25 +30,38 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
     T_0_i_1 << 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1;//Initialize to the identity matrix. TODO: clean the code and make with Identity function of eigen
     double D_c_ri, delta_L_ri, Delta_x_ri, Delta_y_ri, L_factor, Delta_i, Delta_i2, ci, si, scf;
     
+    Eigen::Matrix4f T_prova;T_prova << 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1;
+
     //Run the IK
     for (i = 0; i < nRB; i++ )
     {
+        //T_prova.block<3,3>(0,0) = this->quatToRotm(RBs[i].pose_stamped.pose.orientation.x,
+        //                                            RBs[i].pose_stamped.pose.orientation.y,
+        //                                            RBs[i].pose_stamped.pose.orientation.z,
+        //                                            RBs[i].pose_stamped.pose.orientation.w);
+        //T_prova.block<3,1>(0,3) << RBs[i].pose_stamped.pose.position.x, RBs[i].pose_stamped.pose.position.y, RBs[i].pose_stamped.pose.position.z;
+        //std::cout << T_prova << std::endl;
         R_i_1_ri = T_0_i_1.block<3,3>(0,0).transpose()*this->quatToRotm(RBs[i].pose_stamped.pose.orientation.x,
                                                                         RBs[i].pose_stamped.pose.orientation.y,
                                                                         RBs[i].pose_stamped.pose.orientation.z,
                                                                         RBs[i].pose_stamped.pose.orientation.w);
         t_i_1_ri = (T_0_i_1.inverse()*(Eigen::VectorXf(4) << RBs[i].pose_stamped.pose.position.x, RBs[i].pose_stamped.pose.position.y, RBs[i].pose_stamped.pose.position.z, 1).finished()).head(3);
+        std::cout << R_i_1_ri << std::endl;
+        std::cout << t_i_1_ri << std::endl;
         //Compute the configuration
         L_factor = Ls[i]/ls[i];
-        delta_L_ri = t_i_1_ri(2)*(ds[i]*acos(R_i_1_ri(2,2)))/(sin(acos(R_i_1_ri(2,2))))-ls[i];
+        //
+        //delta_L_ri = t_i_1_ri(2)*(ds[i]*acos(R_i_1_ri(2,2)))/(sin(acos(R_i_1_ri(2,2))))-ls[i];
+        delta_L_ri = t_i_1_ri(2)*(acos(R_i_1_ri(2,2)))/(sin(acos(R_i_1_ri(2,2))))-ls[i];
+        //std::cout << delta_L_ri << std::endl;
+        //
         D_c_ri = ds[i]/(ls[i]+delta_L_ri)*(pow(acos(R_i_1_ri(2,2)), 2)/(R_i_1_ri(2,2)-1));
         Delta_x_ri = t_i_1_ri(0)*D_c_ri;
         Delta_y_ri = t_i_1_ri(1)*D_c_ri;
-
+        //
         q(k)   = L_factor*Delta_x_ri;
         q(k+1) = L_factor*Delta_y_ri;
         q(k+2) = L_factor*delta_L_ri;
-
         //Update the transformation matrix
         Delta_i2= pow(q(k),2) + pow(q(k+1),2);
         Delta_i = sqrt(Delta_i2);
@@ -62,7 +75,7 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
         //Update the itertor for the configuration vector
         k += 3;
     }
-    
+    std::cout << "Configuration vector : " << std::endl;
     std::cout << q << std::endl;
 
     //Return the configuration

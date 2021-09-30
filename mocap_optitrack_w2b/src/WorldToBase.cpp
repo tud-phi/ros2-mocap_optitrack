@@ -90,7 +90,6 @@ void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::Ri
     //TODO : decide what to do in this case, we just continue the process
   }
 
-  // ? : To speed up we can avoid this query but if you change online not working anymore...
   /*RETREIVE THE POSE OF THE ROBOT BASE IN THE MOTIVE FRAME*/
   float base_qx, base_qy, base_qz, base_qw, initial_offset_x, initial_offset_y, initial_offset_z; 
   this->get_parameter("base_qx", base_qx);
@@ -106,12 +105,13 @@ void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::Ri
 
   std::cout << "Transformation matrix from robot base frame to motive : \n";
   std::cout << T_M_0 << std::endl;
-
-  /*Get the transformation matrix from the body frame*/
+  
+  /*Get the transformation matrix from the motive to robot base frame*/
   Matrix4f T_0_M; T_0_M << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1;
   T_0_M.block<3,3>(0,0) = T_M_0.block<3,3>(0,0).transpose();
   T_0_M.block<3,1>(0,3) = -T_0_M.block<3,3>(0,0)*T_M_0.block<3,1>(0,3);
-
+  //
+  std::cout << "Transformation matrix from motive frame to robot base : \n";
   std::cout << T_0_M << std::endl;
 
   Eigen::Vector4f q;
@@ -123,7 +123,7 @@ void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::Ri
       printf("ID : %ld\n", msg->rigid_bodies[i].id);
       printf("Time stamp : %d(s)---%d(ns)\n", msg->rigid_bodies[i].pose_stamped.header.stamp.sec, msg->rigid_bodies[i].pose_stamped.header.stamp.nanosec);
 
-      // Transform the pose
+      //Get the pose of each rigid body in the motive frame
       T_0_P(0, 3) = msg->rigid_bodies[i].pose_stamped.pose.position.x;
       T_0_P(1, 3) = msg->rigid_bodies[i].pose_stamped.pose.position.y;
       T_0_P(2, 3) = msg->rigid_bodies[i].pose_stamped.pose.position.z;
@@ -131,9 +131,11 @@ void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::Ri
                                                msg->rigid_bodies[i].pose_stamped.pose.orientation.y,
                                                msg->rigid_bodies[i].pose_stamped.pose.orientation.z,
                                                msg->rigid_bodies[i].pose_stamped.pose.orientation.w);
-      //Compute the pose of the body in the robot base frame
+      //Compute the pose of the body in the robot base frame using T_0_M
       T_0_P = T_0_M*T_0_P;
+      std::cout << "Transformation matrix from Rigid body " << msg->rigid_bodies[i].id << " to robot base." << std::endl;
       std::cout << T_0_P << std::endl;
+      //
       //Save the tranformed pose in the new message
       mocap_optitrack_interfaces::msg::RigidBody rb = msg->rigid_bodies[i];
       rb.pose_stamped.pose.position.x = T_0_P(0, 3);
@@ -166,6 +168,20 @@ Eigen::Matrix3f WorldToBase::quatToRotm(float qx, float qy, float qz, float qw) 
   R(2,0) = 2*(qx*qz-qw*qy);
   R(2,1) = 2*(qy*qz+qw*qx);
   R(2,2) = 2*(pow(qw,2)+pow(qz,2))-1;
+  //
+  //Equivalent computation of the attitude
+  float xi0,xi1,xi2,xi3;
+  xi0 = qw;xi1 = qx;xi2 = qy; xi3 = qz;
+  R(0,0) = pow(xi0,2) + pow(xi1,2) - pow(xi2,2) - pow(xi3,2);
+  R(0,1) = 2*(xi1*xi2-xi0*xi3);
+  R(0,2) = 2*(xi0*xi2+xi1*xi3);
+  R(1,0) = 2*(xi0*xi3+xi1*xi2);
+  R(1,1) = pow(xi0,2) - pow(xi1,2) + pow(xi2,2) - pow(xi3,2);
+  R(1,2) = 2*(xi2*xi3-xi0*xi1);
+  R(2,0) = 2*(xi1*xi3-xi0*xi2);
+  R(2,1) = 2*(xi0*xi1+xi2*xi3);
+  R(2,2) = pow(xi0,2) - pow(xi1,2) - pow(xi2,2) + pow(xi3,2);
+
   return R;
 }
 
