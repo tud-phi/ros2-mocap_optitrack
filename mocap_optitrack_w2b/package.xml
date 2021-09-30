@@ -3,9 +3,9 @@
 <package format="3">
   <name>mocap_optitrack_w2b</name>
   <version>0.0.1</version>
-  <description>Package that is responsible of the change of coordinates from the world to the robot base.</description>
-  <maintainer email="pietro.pustina@gmail.com">pietro</maintainer>
-  <license>TODO: License declaration</license>
+  <description>Package that is responsible of the change of coordinates from the Motive frame to the robot base. Basically the pose of each rigid body is represented in the robot base coordinates.</description>
+  <maintainer email="pietro.pustina@gmail.com">Pietro Pustina</maintainer>
+  <license>MIT license</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

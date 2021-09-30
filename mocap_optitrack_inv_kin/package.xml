@@ -3,9 +3,9 @@
 <package format="3">
   <name>mocap_optitrack_inv_kin</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="pietro.pustina@gmail.com">pietro</maintainer>
-  <license>TODO: License declaration</license>
+  <description>Package that performs the inverse kinematics according to the state parametrization presented in : Della Santina et al., "On an Improved State Parametrization for Soft Robots With Piecewise Constant Curvature and Its Use in Model Based Control"</description>
+  <maintainer email="pietro.pustina@gmail.com">Pietro Pustina</maintainer>
+  <license>MIT license</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

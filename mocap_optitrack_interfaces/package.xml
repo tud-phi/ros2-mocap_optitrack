@@ -3,9 +3,9 @@
 <package format="3">
   <name>mocap_optitrack_interfaces</name>
   <version>0.0.1</version>
-  <description>Package containing the definition of the ROS2 interfaces used by the system.</description>
-  <maintainer email="pietro.pustina@gmail.com">pietro</maintainer>
-  <license>TODO: License declaration</license>
+  <description>Package containing the definition of the ROS2 interfaces used by the motion capture system.</description>
+  <maintainer email="pietro.pustina@gmail.com">Pietro Pustina</maintainer>
+  <license>MIT license</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

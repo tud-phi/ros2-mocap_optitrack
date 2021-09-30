@@ -3,9 +3,9 @@
 <package format="3">
   <name>mocap_optitrack_client</name>
   <version>0.0.1</version>
-  <description>TODO: Package description</description>
-  <maintainer email="pietro.pustina@gmail.com">pietro</maintainer>
-  <license>TODO: License declaration</license>
+  <description>ROS2 node that handles the connection with Motive software through the NatNet client library. For further details see: https://v23.wiki.optitrack.com/index.php?title=NatNet_SDK_3.1</description>
+  <maintainer email="pietro.pustina@gmail.com">Pietro Pustina</maintainer>
+  <license>MIT license</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
