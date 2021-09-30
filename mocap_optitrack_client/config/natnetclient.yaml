@@ -16,4 +16,4 @@ natnet_client:
     #Port where to receive incoming data
     server_data_port: 1511 #default value: 1511
     #Topic where data is published
-    pub_topic: "rigid_body_topic"
+    pub_topic: "mocap_rigid_bodies"
