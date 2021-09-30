@@ -62,9 +62,13 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
         q(k)   = L_factor*Delta_x_ri;
         q(k+1) = L_factor*Delta_y_ri;
         q(k+2) = L_factor*delta_L_ri;
-        // TO DO : handle the limit also here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         //Update the transformation matrix
         Delta_i2= pow(q(k),2) + pow(q(k+1),2);
+        //If Delta_i2 is too close to zero approximate with eps to compute the limit
+        if(std::abs(Delta_i2) < eps)
+        {
+            Delta_i2 = eps;
+        }
         Delta_i = sqrt(Delta_i2);
         ci      = cos(Delta_i/ds[i]);
         si      = sin(Delta_i/ds[i]);
@@ -73,6 +77,7 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
                                                    (q(k)*q(k+1)/Delta_i2*(ci-1))  , 1+(pow(q(k+1),2)/Delta_i2)*(ci-1), q(k+1)/Delta_i*si, scf*q(k+1)*(1-ci),
                                                    -q(k)/Delta_i*si               , -q(k+1)/Delta_i*si               , ci               , scf*Delta_i*si,
                                                    0                              , 0                                , 0                , 1).finished();
+        std::cout << T_0_i_1 << std::endl;
         //Update the iterator for the configuration vector
         k += 3;
     }
