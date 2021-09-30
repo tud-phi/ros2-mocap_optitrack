@@ -47,26 +47,17 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
         //Compute the limit if too close to 1
         if(std::abs(R_i_1_ri(2,2)) < 1)
         {
-            printf("Entrato qui...\n");
             delta_L_ri = t_i_1_ri(2)*(acos(R_i_1_ri(2,2)))/(sin(acos(R_i_1_ri(2,2))))-ls[i];
             //
             D_c_ri = ds[i]/(ls[i]+delta_L_ri)*(pow(acos(R_i_1_ri(2,2)), 2)/(R_i_1_ri(2,2)-1));
         }else{
-            printf("Entrato qui sfw...\n");
-            printf("valore %f\n", R_i_1_ri(2,2));
-            printf("valore assoluto %f\n", std::abs(R_i_1_ri(2,2)));
             float R_i_1_22 = R_i_1_ri(2,2) + eps*((R_i_1_ri(2,2) > 0) ? -1 : 1);
-            printf("valore modificato %f\n", R_i_1_22);
             delta_L_ri = t_i_1_ri(2)*(acos(R_i_1_22))/(sin(acos(R_i_1_22)))-ls[i];
             //
             D_c_ri = ds[i]/(ls[i]+delta_L_ri)*(pow(acos(R_i_1_22), 2)/(R_i_1_22-1));
         }
         Delta_x_ri = t_i_1_ri(0)*D_c_ri;
         Delta_y_ri = t_i_1_ri(1)*D_c_ri;
-        if(std::isnan(delta_L_ri))
-        {
-            std::cout << "Valore infinito......................................." << std::endl;
-        }
         //
         q(k)   = L_factor*Delta_x_ri;
         q(k+1) = L_factor*Delta_y_ri;
