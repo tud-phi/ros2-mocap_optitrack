@@ -40,22 +40,16 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
                                                                         RBs[i].pose_stamped.pose.orientation.z,
                                                                         RBs[i].pose_stamped.pose.orientation.w);
         t_i_1_ri = (T_0_i_1.inverse()*(Eigen::VectorXf(4) << RBs[i].pose_stamped.pose.position.x, RBs[i].pose_stamped.pose.position.y, RBs[i].pose_stamped.pose.position.z, 1).finished()).head(3);
-        //std::cout << R_i_1_ri << std::endl;
-        //std::cout << t_i_1_ri << std::endl;
         //Compute the configuration
         L_factor = Ls[i]/ls[i];
-        //Compute the limit if too close to 1
-        if(std::abs(R_i_1_ri(2,2)) < 1)
+        //Approximate with an epsilon quantity to run the limit
+        if(std::abs(R_i_1_ri(2,2)) >= 1)
         {
-            delta_L_ri = t_i_1_ri(2)*(acos(R_i_1_ri(2,2)))/(sin(acos(R_i_1_ri(2,2))))-ls[i];
-            //
-            D_c_ri = ds[i]/(ls[i]+delta_L_ri)*(pow(acos(R_i_1_ri(2,2)), 2)/(R_i_1_ri(2,2)-1));
-        }else{
-            float R_i_1_22 = R_i_1_ri(2,2) + eps*((R_i_1_ri(2,2) > 0) ? -1 : 1);
-            delta_L_ri = t_i_1_ri(2)*(acos(R_i_1_22))/(sin(acos(R_i_1_22)))-ls[i];
-            //
-            D_c_ri = ds[i]/(ls[i]+delta_L_ri)*(pow(acos(R_i_1_22), 2)/(R_i_1_22-1));
+            R_i_1_ri(2,2) = R_i_1_ri(2,2) + eps*((R_i_1_ri(2,2) > 0) ? -1 : 1);
         }
+        delta_L_ri = t_i_1_ri(2)*(acos(R_i_1_ri(2,2)))/(sin(acos(R_i_1_ri(2,2))))-ls[i];
+        //
+        D_c_ri = ds[i]/(ls[i]+delta_L_ri)*(pow(acos(R_i_1_ri(2,2)), 2)/(R_i_1_ri(2,2)-1));
         Delta_x_ri = t_i_1_ri(0)*D_c_ri;
         Delta_y_ri = t_i_1_ri(1)*D_c_ri;
         //
