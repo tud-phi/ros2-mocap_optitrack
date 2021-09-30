@@ -1,6 +1,7 @@
 #include <WorldToBase.h>
 #include <stdio.h>
 #include <eigen3/Eigen/Dense>
+#include <cmath>
  
 using namespace Eigen;
 using namespace std;
@@ -170,18 +171,17 @@ Eigen::Matrix3f WorldToBase::quatToRotm(float qx, float qy, float qz, float qw) 
   R(2,2) = 2*(pow(qw,2)+pow(qz,2))-1;
   //
   //Equivalent computation of the attitude
-  float xi0,xi1,xi2,xi3;
-  xi0 = qw;xi1 = qx;xi2 = qy; xi3 = qz;
-  R(0,0) = pow(xi0,2) + pow(xi1,2) - pow(xi2,2) - pow(xi3,2);
-  R(0,1) = 2*(xi1*xi2-xi0*xi3);
-  R(0,2) = 2*(xi0*xi2+xi1*xi3);
-  R(1,0) = 2*(xi0*xi3+xi1*xi2);
-  R(1,1) = pow(xi0,2) - pow(xi1,2) + pow(xi2,2) - pow(xi3,2);
-  R(1,2) = 2*(xi2*xi3-xi0*xi1);
-  R(2,0) = 2*(xi1*xi3-xi0*xi2);
-  R(2,1) = 2*(xi0*xi1+xi2*xi3);
-  R(2,2) = pow(xi0,2) - pow(xi1,2) - pow(xi2,2) + pow(xi3,2);
-
+  //float xi0,xi1,xi2,xi3;
+  //xi0 = qw;xi1 = qx;xi2 = qy; xi3 = qz;
+  //R(0,0) = pow(xi0,2) + pow(xi1,2) - pow(xi2,2) - pow(xi3,2);
+  //R(0,1) = 2*(xi1*xi2-xi0*xi3);
+  //R(0,2) = 2*(xi0*xi2+xi1*xi3);
+  //R(1,0) = 2*(xi0*xi3+xi1*xi2);
+  //R(1,1) = pow(xi0,2) - pow(xi1,2) + pow(xi2,2) - pow(xi3,2);
+  //R(1,2) = 2*(xi2*xi3-xi0*xi1);
+  //R(2,0) = 2*(xi1*xi3-xi0*xi2);
+  //R(2,1) = 2*(xi0*xi1+xi2*xi3);
+  //R(2,2) = pow(xi0,2) - pow(xi1,2) - pow(xi2,2) + pow(xi3,2);
   return R;
 }
 
@@ -192,15 +192,37 @@ Eigen::Vector4f WorldToBase::rotmToQuat(Eigen::Matrix3f R) const
   float x;
   //
   x = R(2,1)- R(1,2);
-  q(0) = ( (x >= 0) ? 1 : -1)*sqrt(R(0,0)-R(1,1)-R(2,2)+1);
+  if(R(0,0)-R(1,1)-R(2,2)+1 > 0)
+  {
+    q(0) = ( (x >= 0) ? 1 : -1)*sqrt(R(0,0)-R(1,1)-R(2,2)+1);
+  }else
+  {
+    q(0) = 0.0;
+  }
   //
   x = R(0,2)- R(2,0);
-  q(1) = ( (x >= 0) ? 1 : -1)*sqrt(R(1,1)-R(2,2)-R(0,0)+1);
+  if(R(1,1)-R(2,2)-R(0,0)+1 > 0)
+  {
+    q(1) = ( (x >= 0) ? 1 : -1)*sqrt(R(1,1)-R(2,2)-R(0,0)+1);
+  }else
+  {
+    q(1) = 0.0;
+  }
   //
   x = R(1,0)- R(0,1);
-  q(2) = ( (x >= 0) ? 1 : -1)*sqrt(R(2,2)-R(1,1)-R(0,0)+1);
+  if(R(2,2)-R(1,1)-R(0,0)+1 > 0)
+  {
+    q(2) = ( (x >= 0) ? 1 : -1)*sqrt(R(2,2)-R(1,1)-R(0,0)+1);
+  }else{
+    q(2) = 0.0;
+  }
   //
-  q(3) = sqrt(R(0,0)+R(1,1)+R(2,2)+1);
+  if(R(0,0)+R(1,1)+R(2,2)+1 > 0)
+  {
+    q(3) = sqrt(R(0,0)+R(1,1)+R(2,2)+1);
+  }else{
+    q(3) = 0.0;
+  }
   //
   q = 0.5*q;
   return q;
