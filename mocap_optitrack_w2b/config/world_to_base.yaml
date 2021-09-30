@@ -9,6 +9,6 @@ world_to_base:
       initial_offset_x: 0.0
       initial_offset_y: -0.019 #unit of measures are in [m]
       initial_offset_z: 0.0
-      base_id: 4 #motive ID of the robot base
+      base_id: 1 #motive ID of the robot base
       sub_topic: "rigid_body_topic"
       pub_topic: "rigid_body_baseframe_topic"

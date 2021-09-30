@@ -45,7 +45,8 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
         //Approximate with an epsilon quantity to run the limit
         if(std::abs(R_i_1_ri(2,2)) >= 1)
         {
-            R_i_1_ri(2,2) = R_i_1_ri(2,2) + eps*((R_i_1_ri(2,2) > 0) ? -1 : 1);
+            std::cout << "Entrato qui..." << std::endl;
+            R_i_1_ri(2,2) = R_i_1_ri(2,2) + pow(10,3)*eps*((R_i_1_ri(2,2) > 0) ? -1 : 1);
         }
         delta_L_ri = t_i_1_ri(2)*(acos(R_i_1_ri(2,2)))/(sin(acos(R_i_1_ri(2,2))))-ls[i];
         //
@@ -61,6 +62,7 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
         //If Delta_i2 is too close to zero approximate with eps to compute the limit
         if(std::abs(Delta_i2) < eps)
         {
+            std::cout << "Entrato qui..........." << std::endl;
             Delta_i2 = eps;
         }
         Delta_i = sqrt(Delta_i2);
@@ -71,7 +73,6 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
                                                    (q(k)*q(k+1)/Delta_i2*(ci-1))  , 1+(pow(q(k+1),2)/Delta_i2)*(ci-1), q(k+1)/Delta_i*si, scf*q(k+1)*(1-ci),
                                                    -q(k)/Delta_i*si               , -q(k+1)/Delta_i*si               , ci               , scf*Delta_i*si,
                                                    0                              , 0                                , 0                , 1).finished();
-        std::cout << T_0_i_1 << std::endl;
         //Update the iterator for the configuration vector
         k += 3;
     }
@@ -127,7 +128,7 @@ Eigen::Matrix3f InverseKinematics::quatToRotm(float qx, float qy, float qz, floa
   R(2,0) = 2*(qx*qz-qw*qy);
   R(2,1) = 2*(qy*qz+qw*qx);
   R(2,2) = 2*(pow(qw,2)+pow(qz,2))-1;
-  std::cout << "qx : " << qx << " qy : " << qy << " qz : " << qz << " qw : " << qw << std::endl;
-  std::cout << R << std::endl;
+  //std::cout << "qx : " << qx << " qy : " << qy << " qz : " << qz << " qw : " << qw << std::endl;
+  //std::cout << R << std::endl;
   return R;
 }
