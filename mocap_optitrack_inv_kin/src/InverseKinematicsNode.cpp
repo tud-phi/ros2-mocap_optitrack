@@ -1,4 +1,5 @@
 #include <InverseKinematicsNode.h>
+#include <InverseKinematics.h>
 
 //Class constructor
 InverseKinematicsNode::InverseKinematicsNode(): Node("inverse_kinematics")
@@ -28,8 +29,7 @@ InverseKinematicsNode::InverseKinematicsNode(): Node("inverse_kinematics")
     this->publisher_ = this->create_publisher<mocap_optitrack_interfaces::msg::ConfigurationArray>(pub_topic, 10);
     //
     //Create the node responsible of handling the inverse kinematics
-    //this->ik = InverseKinematics(this);
-    this->ik = InverseKinematics();
+    this->ik = std::unique_ptr<InverseKinematics>(new InverseKinematics(this));
     //
     //Log data
     RCLCPP_INFO(this->get_logger(), "Created IK node. Listening for incoming data...\n");
@@ -50,7 +50,7 @@ void InverseKinematicsNode::rigid_body_topic_callback(const mocap_optitrack_inte
     this->get_parameter("segment_ls", Ls);
     //
     //Call the inverse kinematics to get the configuration
-    Eigen::VectorXf q = this->ik.getConfiguration(msg, IDs, ls, ds, Ls);
+    Eigen::VectorXf q = this->ik->getConfiguration(msg, IDs, ls, ds, Ls);
 }
 
 int main(int argc, char ** argv)

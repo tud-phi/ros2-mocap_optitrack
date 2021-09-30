@@ -4,10 +4,13 @@
 #include "rclcpp/rclcpp.hpp"
 #include "mocap_optitrack_interfaces/msg/configuration_array.hpp"
 #include "mocap_optitrack_interfaces/msg/rigid_body_array.hpp"
-#include <InverseKinematics.h>
 #include <stdio.h>
 
+
 using std::placeholders::_1;
+
+class InverseKinematics;
+
 class InverseKinematicsNode: public rclcpp::Node
 {
 private:
@@ -17,7 +20,7 @@ private:
     //Attributes
     rclcpp::Subscription<mocap_optitrack_interfaces::msg::RigidBodyArray>::SharedPtr subscription_;
     rclcpp::Publisher<mocap_optitrack_interfaces::msg::ConfigurationArray>::SharedPtr publisher_;
-    InverseKinematics ik;
+    std::unique_ptr<InverseKinematics> ik;
 
 public:
     //Methods

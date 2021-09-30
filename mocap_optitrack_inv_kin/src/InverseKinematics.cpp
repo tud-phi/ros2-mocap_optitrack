@@ -1,11 +1,13 @@
 #include <InverseKinematics.h>
+#include <InverseKinematicsNode.h>
+
 #include <cmath>
 #include <limits>
 #include <type_traits>
 
-InverseKinematics::InverseKinematics()
+InverseKinematics::InverseKinematics(InverseKinematicsNode* IKNode_)
 {
-    //this->IKNode = IKNode_;
+    this->IKNode = IKNode_;
 }
 
 /*Main method to get the configuration vector*/
@@ -46,7 +48,6 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
         //Approximate with an epsilon quantity to run the limit
         if(std::abs(R_i_1_ri(2,2)) >= 1)
         {
-            std::cout << "Entrato qui..." << std::endl;
             R_i_1_ri(2,2) = R_i_1_ri(2,2) + pow(10,3)*eps*((R_i_1_ri(2,2) > 0) ? -1 : 1);
         }
         delta_L_ri = t_i_1_ri(2)*(acos(R_i_1_ri(2,2)))/(sin(acos(R_i_1_ri(2,2))))-ls[i];
@@ -63,7 +64,6 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
         //If Delta_i2 is too close to zero approximate with eps to compute the limit
         if(std::abs(Delta_i2) < eps)
         {
-            std::cout << "Entrato qui..........." << std::endl;
             Delta_i2 = eps;
         }
         Delta_i = sqrt(Delta_i2);
@@ -77,9 +77,9 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
         //Update the iterator for the configuration vector
         k += 3;
     }
-    std::cout << "Configuration vector : " << std::endl;
-    std::cout << q << std::endl;
-
+    RCLCPP_DEBUG(this->IKNode->get_logger(), "Configuration vector : \n");
+    RCLCPP_DEBUG(this->IKNode->get_logger(), (static_cast<std::ostringstream&&>(std::ostringstream() << q)).str().c_str());
+    //
     //Return the configuration
     return q;
 }
@@ -92,7 +92,7 @@ int InverseKinematics::getRingPosition(const mocap_optitrack_interfaces::msg::Ri
         if ( msg->rigid_bodies[i].id == ID) return i;
     }
     //ID not found
-    //RCLCPP_ERROR(this->IKNode->get_logger(), "ID [%d] not found in the message.\n", ID);
+    RCLCPP_ERROR(this->IKNode->get_logger(), "ID [%d] not found in the message.\n", ID);
     return -1;
 }
 
@@ -107,7 +107,7 @@ std::vector<mocap_optitrack_interfaces::msg::RigidBody> InverseKinematics::getSo
     {
         //Get the position of current ring
         i = this->getRingPosition(msg, nRB, pos);
-        if (i == -1){printf("Error: ring not found.\n");}else{//TO DO: implement the error as a ROS2 log
+        if (i == -1){RCLCPP_ERROR(this->IKNode->get_logger(), "Ring not found.\n");}else{//TO DO: implement the error as a ROS2 log
             //Compute the inverse kinematics
             RBs.push_back(msg->rigid_bodies[i]);
         }
@@ -129,7 +129,5 @@ Eigen::Matrix3f InverseKinematics::quatToRotm(float qx, float qy, float qz, floa
   R(2,0) = 2*(qx*qz-qw*qy);
   R(2,1) = 2*(qy*qz+qw*qx);
   R(2,2) = 2*(pow(qw,2)+pow(qz,2))-1;
-  //std::cout << "qx : " << qx << " qy : " << qy << " qz : " << qz << " qw : " << qw << std::endl;
-  //std::cout << R << std::endl;
   return R;
 }

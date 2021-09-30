@@ -6,6 +6,8 @@
 #include <eigen3/Eigen/Dense>
 #include <iostream>
 
+class InverseKinematicsNode;
+
 class InverseKinematics
 {
 private:
@@ -14,10 +16,10 @@ private:
     int getRingPosition(const mocap_optitrack_interfaces::msg::RigidBodyArray::SharedPtr &msg, int nRB, int ID) const;
     std::vector<mocap_optitrack_interfaces::msg::RigidBody> getSorteredBodies(const mocap_optitrack_interfaces::msg::RigidBodyArray::SharedPtr &msg, std::vector<long int> &ring_ids) const;
     //Private attributes
-    //InverseKinematicsNode IKNode;
+    InverseKinematicsNode* IKNode;
 public:
     //Public methods
-    //InverseKinematics(InverseKinematicsNode IKNode_);
+    InverseKinematics(InverseKinematicsNode* IKNode_);
     InverseKinematics();
 
     Eigen::VectorXf getConfiguration(const mocap_optitrack_interfaces::msg::RigidBodyArray::SharedPtr &msg, 
