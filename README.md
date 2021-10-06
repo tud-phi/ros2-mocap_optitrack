@@ -1,4 +1,4 @@
-ROS2 packages implementaing the data acquisition system described in: https://www.overleaf.com/read/mggtpwfjhjzt
+Set of ROS2 packages implementing the data acquisition system described in: https://www.overleaf.com/read/mggtpwfjhjzt
 
 Build the packages: 
 ```bash
