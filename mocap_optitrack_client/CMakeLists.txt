@@ -17,33 +17,56 @@ endif()
 find_package(ament_cmake REQUIRED)
 # Add the custom interfaces for the mocap system
 find_package(rclcpp REQUIRED)#publisher
+find_package(rclcpp_components REQUIRED)
 find_package(mocap_optitrack_interfaces REQUIRED)
+
+#Download the NatNet SDK library
+include(FetchContent)
+fetchcontent_declare(natnet_sdk_content
+  URL https://s3.amazonaws.com/naturalpoint/software/NatNetSDKLinux/ubuntu/NatNet_SDK_4.0_ubuntu.tar
+)
+fetchcontent_makeavailable(natnet_sdk_content)
+
+add_library(natnet_sdk SHARED IMPORTED)
+target_include_directories(natnet_sdk INTERFACE ${natnet_sdk_content_SOURCE_DIR}/include)
+set_target_properties(natnet_sdk PROPERTIES IMPORTED_LOCATION ${natnet_sdk_content_SOURCE_DIR}/lib/libNatNet.so)
+
 
 #Include the headers for the MoCap class
 include_directories(include/MoCapPublisher)
-#Include the headers for the NatNet SDK
-include_directories(include/NatNet)
 #Include the headers for the NatNet client
 include_directories(include/MoCapNatNetClient)
 
-#Add the directory where the libraries are located
-link_directories(${CMAKE_SOURCE_DIR}/lib)
+# TARGETS
+add_executable(mocap_optitrack_client src/MoCapNatNetClient.cpp src/MoCapPublisher.cpp)
+target_include_directories(mocap_optitrack_client
+PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+  ${mocap_optitrack_interfaces_INCLUDE_DIRS}
+)
+target_link_libraries(mocap_optitrack_client
+PUBLIC
+  natnet_sdk
+  rclcpp::rclcpp
+  ${mocap_optitrack_interfaces_LIBRARIES}
+)
 
-
-#Create the executables
-add_executable(mocap_optitrack_client src/MoCapPublisher.cpp src/MoCapNatNetClient.cpp)
-ament_target_dependencies(mocap_optitrack_client rclcpp mocap_optitrack_interfaces)
-
-
-#Add all the used libraries to the project
-target_link_libraries(mocap_optitrack_client NatNet)#in the folder ./lib there must be a file libNatNet.so
+# INSTALLATION
 install(TARGETS 
   mocap_optitrack_client
-  DESTINATION lib/${PROJECT_NAME})
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(
+  FILES                 ${natnet_sdk_content_SOURCE_DIR}/lib/libNatNet.so
+  DESTINATION           lib
+)
 
 #Add the configuration file to the binaries
 install(DIRECTORY
   config
   DESTINATION share/${PROJECT_NAME}
 )
+
 ament_package()
