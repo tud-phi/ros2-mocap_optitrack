@@ -2,7 +2,7 @@
 add_compile_definitions(RCLCPP_LOG_MIN_SEVERITY=RCLCPP_LOG_MIN_SEVERITY_DEBUG)
 
 cmake_minimum_required(VERSION 3.5)
-project(mocap_optitrack_client_old)
+project(mocap_optitrack_client)
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
