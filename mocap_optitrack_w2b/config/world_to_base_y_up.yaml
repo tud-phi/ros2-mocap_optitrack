@@ -1,4 +1,4 @@
-#Configuration file for the world_to_base node (w2b)
+#Configuration file for the world_to_base node (w2b) when in the data streaming pane of motive the Up Axis option is set to "Y up"
 world_to_base:
   ros__parameters:
       #Orientation of the robot base w.r.t. Motive Frame as unit quaternion

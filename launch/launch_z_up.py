@@ -1,3 +1,4 @@
+#Launch file when in the data streaming pane the Up Axis option is set to "Z up"
 from launch import LaunchDescription
 from launch_ros.actions import Node
 import os
@@ -21,7 +22,7 @@ def generate_launch_description():
     config = os.path.join(
         get_package_share_directory('mocap_optitrack_w2b'),
         'config',
-        'world_to_base.yaml'
+        'world_to_base_z_up.yaml'
         )
     world_to_base = Node(
             package='mocap_optitrack_w2b',

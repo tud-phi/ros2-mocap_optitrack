@@ -132,6 +132,8 @@ void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::Ri
                                                msg->rigid_bodies[i].pose_stamped.pose.orientation.y,
                                                msg->rigid_bodies[i].pose_stamped.pose.orientation.z,
                                                msg->rigid_bodies[i].pose_stamped.pose.orientation.w);
+      RCLCPP_DEBUG(this->get_logger(), "Transformation matrix from Rigid body %ld to motive frame.\n", msg->rigid_bodies[i].id);
+      RCLCPP_DEBUG(this->get_logger(), (static_cast<std::ostringstream&&>(std::ostringstream() << T_0_P)).str().c_str());
       //Compute the pose of the body in the robot base frame using T_0_M
       T_0_P = T_0_M*T_0_P;
       RCLCPP_DEBUG(this->get_logger(), "Transformation matrix from Rigid body %ld to robot base.\n", msg->rigid_bodies[i].id);
