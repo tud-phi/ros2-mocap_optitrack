@@ -9,6 +9,7 @@ Source the built packages:
 ```bash
 . install/setup.bash
 ```
+Enter the source directory:
 
 Run the system via the configuratin file:
 ```bash
