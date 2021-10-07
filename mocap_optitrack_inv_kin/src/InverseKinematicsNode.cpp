@@ -41,7 +41,7 @@ InverseKinematicsNode::InverseKinematicsNode(): Node("inverse_kinematics")
             break;
         default:
             RCLCPP_INFO(this->get_logger(), "Created 3D IK node. Listening for incoming data...\n");
-            this->ik = std::unique_ptr<InverseKinematics>(new InverseKinematics2D(this));
+            this->ik = std::unique_ptr<InverseKinematics>(new InverseKinematics3D(this));
     }
 }
 
