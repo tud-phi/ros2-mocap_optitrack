@@ -10,6 +10,7 @@ InverseKinematics::InverseKinematics(InverseKinematicsNode* IKNode_)
     this->IKNode = IKNode_;
 }
 
+
 /*Main method to get the configuration vector*/
 Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interfaces::msg::RigidBodyArray::SharedPtr &msg, 
                           std::vector<long int> &ring_ids,
