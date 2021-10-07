@@ -243,6 +243,13 @@ void NATNET_CALLCONV dataFrameHandler(sFrameOfMocapData* data, void* pUserData)
     bool bHasModel;     // marker has an associated asset in the data stream
     bool bUnlabeled;    // marker is 'unlabeled', but has a point cloud ID that matches Motive PointCloud ID (In Motive 3D View)
 	bool bActiveMarker; // marker is an actively labeled LED marker
+    (void) bOccluded;
+    (void) bPCSolved;
+    (void) bModelSolved;
+    (void) bHasModel;
+    (void) bUnlabeled;
+    (void) bActiveMarker;
+    
     //
 	RCLCPP_DEBUG(pClient->getPublisher()->get_logger(), "Markers [Count=%d]\n", data->nLabeledMarkers);
 	for(i=0; i < data->nLabeledMarkers; i++)
