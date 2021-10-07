@@ -1,6 +1,7 @@
 #include <InverseKinematicsNode.h>
 #include <InverseKinematics.h>
 #include <InverseKinematics3D.h>
+#include <InverseKinematics2D.h>
 
 //Class constructor
 InverseKinematicsNode::InverseKinematicsNode(): Node("inverse_kinematics")
@@ -11,8 +12,9 @@ InverseKinematicsNode::InverseKinematicsNode(): Node("inverse_kinematics")
     this->declare_parameter("ring_ds");
     this->declare_parameter("segment_ls");
     this->declare_parameter<int>("base_id", 0);
-    this->declare_parameter<std::string>("sub_topic", "rigid_body_baseframe_topic");
-    this->declare_parameter<std::string>("pub_topic", "configuration_topic");
+    this->declare_parameter<int>("2d_inverse_kinematics", 0);
+    this->declare_parameter<std::string>("sub_topic", "baseframe_rigid_bodies");
+    this->declare_parameter<std::string>("pub_topic", "robot_configuration");
     //
     //Subscribe to the topic for RigidBody messages
     std::string sub_topic_;
@@ -30,10 +32,17 @@ InverseKinematicsNode::InverseKinematicsNode(): Node("inverse_kinematics")
     this->publisher_ = this->create_publisher<mocap_optitrack_interfaces::msg::ConfigurationArray>(pub_topic, 10);
     //
     //Create the node responsible of handling the inverse kinematics
-    this->ik = std::unique_ptr<InverseKinematics>(new InverseKinematics3D(this));
-    //
-    //Log data
-    RCLCPP_INFO(this->get_logger(), "Created IK node. Listening for incoming data...\n");
+    int IK_type;
+    this->get_parameter("2d_inverse_kinematics", IK_type);
+    switch (IK_type){
+        case 1:
+            RCLCPP_INFO(this->get_logger(), "Created 2D IK node. Listening for incoming data...\n");
+            this->ik = std::unique_ptr<InverseKinematics>(new InverseKinematics2D(this));
+            break;
+        default:
+            RCLCPP_INFO(this->get_logger(), "Created 3D IK node. Listening for incoming data...\n");
+            this->ik = std::unique_ptr<InverseKinematics>(new InverseKinematics2D(this));
+    }
 }
 
 //Topic to receive the message of rigid bodies
