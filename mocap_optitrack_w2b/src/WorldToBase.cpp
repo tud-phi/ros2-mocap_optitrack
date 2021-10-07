@@ -10,10 +10,10 @@ using namespace std;
 WorldToBase::WorldToBase(): Node("world_to_base")
 {
   //Declare the parameters of the node
-  this->declare_parameter<float>("base_qx", 0.0);
+  this->declare_parameter<float>("base_qx", -0.7071068);
   this->declare_parameter<float>("base_qy", 0.0);
   this->declare_parameter<float>("base_qz", 0.0);
-  this->declare_parameter<float>("base_qw", 1.0);
+  this->declare_parameter<float>("base_qw",  0.7071068);
   this->declare_parameter<float>("initial_offset_x", 0.0);
   this->declare_parameter<float>("initial_offset_y", -0.19);
   this->declare_parameter<float>("initial_offset_z", 0.0);
