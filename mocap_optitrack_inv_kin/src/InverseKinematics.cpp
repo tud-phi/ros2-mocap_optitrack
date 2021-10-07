@@ -23,11 +23,15 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
     //
     int i, k = 0;
     int nRB = (int) RBs.size();//number of rigid bodies
-    //Allocate the vector of configuration variables to be returned
+    //
+    // Configuration vector to be returned
     Eigen::VectorXf q(nRB*3);
-    //Auxiliary variables
-    Eigen::Matrix3f R_i_1_ri;
-    Eigen::Vector3f t_i_1_ri;
+    //
+    // Rotation matrix from ring (i) frame to ring (i-1) frame
+    Eigen::Matrix3f R_i_1_ri; R_i_1_ri << 1,0,0,0,1,0,0,0,1;
+    // Position of the origin of ring (i) expressed in ring (i-1) frame
+    Eigen::Vector3f t_i_1_ri; t_i_1_ri << 0,0,0;
+    //Transformation matrix from ring (i-1) to robot base frame
     Eigen::Matrix4f T_0_i_1; T_0_i_1 << 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1;
     double D_c_ri, delta_L_ri, Delta_x_ri, Delta_y_ri, L_factor, Delta_i, Delta_i2, ci, si, scf;
     //Epsilon quantity for limit computations, i.e. around 0
@@ -41,9 +45,10 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
                                                                         RBs[i].pose_stamped.pose.orientation.z,
                                                                         RBs[i].pose_stamped.pose.orientation.w);
         t_i_1_ri = (T_0_i_1.inverse()*(Eigen::VectorXf(4) << RBs[i].pose_stamped.pose.position.x, RBs[i].pose_stamped.pose.position.y, RBs[i].pose_stamped.pose.position.z, 1).finished()).head(3);
-        //Compute the configuration
+        /*Compute the configuration*/
+        //Compute the scaling factor for the current segment
         L_factor = Ls[i]/ls[i];
-        //Approximate with an epsilon quantity to run the limit
+        //Approximate 1 with 1-eps to run the limit (straight configuration)
         if(std::abs(R_i_1_ri(2,2)) >= 1)
         {
             R_i_1_ri(2,2) = R_i_1_ri(2,2) + pow(10,3)*eps*((R_i_1_ri(2,2) > 0) ? -1 : 1);
@@ -75,6 +80,7 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
         //Update the iterator for the configuration vector
         k += 3;
     }
+    //Log the configuration vector
     RCLCPP_DEBUG(this->IKNode->get_logger(), "Configuration vector : \n");
     RCLCPP_DEBUG(this->IKNode->get_logger(), (static_cast<std::ostringstream&&>(std::ostringstream() << q)).str().c_str());
     //
@@ -82,6 +88,7 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
     return q;
 }
 
+//Method that gets the index position from the message msg given the length of the message and the ID of the ring in the motion capture system.
 int InverseKinematics::getRingPosition(const mocap_optitrack_interfaces::msg::RigidBodyArray::SharedPtr &msg, int nRB, int ID) const
 {
     int i;
