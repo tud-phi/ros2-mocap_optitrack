@@ -50,25 +50,28 @@ void WorldToBase::rigid_body_topic_callback(const mocap_optitrack_interfaces::ms
 // Method that transforms the pose of the rigid bodies expressed in the motion capture system into the base frame of the robot
 void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::RigidBodyArray::SharedPtr msg) const
 {
-  Vector3f P, P_base;//P_base is the position of the robot base recorded by Motive
-  Vector4f P_1;
-  Matrix3f R, R_base;//R_base is the orientation of the robot base recoded by Motive
-  Matrix4f T_M_0, T_0_P;//transformation matrix from the motion capture system to the robot base frame
+  /*Variables declaration*/
+  Vector3f P_base;//P_base is the position of the robot base recorded by the motion capture system
+  Matrix3f R_base;//R_base is the orientation of the robot base recorded by the motion capture system
+  Matrix4f T_M_0, T_0_M;//transformation matrix from the robot base frame to the motion capture system and inverse
+  Matrix4f T_0_B;//transformation matrix from a (generic) rigid body frame to the robot base frame
+  Matrix4f T_M_B;//transformation matrix from a (generic) rigid body frame to the motion capture frame
   //
+  int i,i_base = -1;//i is the iterator, i_base is the index position in the RigidBodyArray 
+  int nRB = (int) msg->rigid_bodies.size();
+  int BASE_STREAMING_ID = -1;//Motive ID of the robot base
+  //Retreive the ID of the base frame
+  this->get_parameter("base_id", BASE_STREAMING_ID);
+  RCLCPP_INFO(this->get_logger(), "BASE ID : %d\n", BASE_STREAMING_ID);
+  //
+  /*Initialization of the variables*/
   P_base << 0,0,0;
   R_base << 0,0,0,0,0,0,0,0,0;
   T_M_0  << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1;
-  T_0_P  << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1;
-  P_1 << 0,0,0,1;
+  T_0_M  << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1;
+  T_0_B  << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1;
+  T_M_B  << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1;
   //
-  int i,i_base = -1;
-  int nRB = (int) msg->rigid_bodies.size();
-  //
-  /*USE THE ROBOT BASE ONLINE*/
-  //Retreive the ID of the base frame
-  int BASE_STREAMING_ID = -1;
-  this->get_parameter("base_id", BASE_STREAMING_ID);
-  RCLCPP_INFO(this->get_logger(), "BASE ID : %d\n", BASE_STREAMING_ID);
   // Get the pose of the base of the robot recorded by Motive
   for (i = 0; i < nRB; i++)
   {
@@ -103,19 +106,17 @@ void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::Ri
   T_M_0.block<3,3>(0,0) = quatToRotm(base_qx, base_qy, base_qz, base_qw);
   T_M_0.block<3,1>(0,3) << initial_offset_x, initial_offset_y, initial_offset_z;
   T_M_0.block<3,1>(0,3) += P_base;
-  //
+  //Log some stuff
   RCLCPP_DEBUG(this->get_logger(), "Transformation matrix from robot base frame to motive : \n"); 
   RCLCPP_DEBUG(this->get_logger(), (static_cast<std::ostringstream&&>(std::ostringstream() << T_M_0)).str().c_str()); 
   //
-  /*Get the transformation matrix from the motive to robot base frame*/
-  Matrix4f T_0_M; T_0_M << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1;
+  /*Get the transformation matrix from the motive to robot base frame inverting T_M_0*/
   T_0_M.block<3,3>(0,0) = T_M_0.block<3,3>(0,0).transpose();
   T_0_M.block<3,1>(0,3) = -T_0_M.block<3,3>(0,0)*T_M_0.block<3,1>(0,3);
-  //
   RCLCPP_DEBUG(this->get_logger(), "Transformation matrix from motive frame to robot base : \n"); 
   RCLCPP_DEBUG(this->get_logger(), (static_cast<std::ostringstream&&>(std::ostringstream() << T_0_M)).str().c_str()); 
   //
-  Eigen::Vector4f q;
+  Eigen::Vector4f q;//vector that represents a quaternion
   mocap_optitrack_interfaces::msg::RigidBodyArray msg_r;
   /*Compute the pose of each rigid body in the robot base frame*/
   for (i = 0; i < nRB; i++)
@@ -125,32 +126,33 @@ void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::Ri
       RCLCPP_DEBUG(this->get_logger(), "Time stamp : %d(s)---%d(ns)\n", msg->rigid_bodies[i].pose_stamped.header.stamp.sec, msg->rigid_bodies[i].pose_stamped.header.stamp.nanosec);
       //
       //Get the pose of each rigid body in the motive frame
-      T_0_P(0, 3) = msg->rigid_bodies[i].pose_stamped.pose.position.x;
-      T_0_P(1, 3) = msg->rigid_bodies[i].pose_stamped.pose.position.y;
-      T_0_P(2, 3) = msg->rigid_bodies[i].pose_stamped.pose.position.z;
-      T_0_P.block<3,3>(0,0) = this->quatToRotm(msg->rigid_bodies[i].pose_stamped.pose.orientation.x,
+      T_M_B(0, 3) = msg->rigid_bodies[i].pose_stamped.pose.position.x;
+      T_M_B(1, 3) = msg->rigid_bodies[i].pose_stamped.pose.position.y;
+      T_M_B(2, 3) = msg->rigid_bodies[i].pose_stamped.pose.position.z;
+      T_M_B.block<3,3>(0,0) = this->quatToRotm(msg->rigid_bodies[i].pose_stamped.pose.orientation.x,
                                                msg->rigid_bodies[i].pose_stamped.pose.orientation.y,
                                                msg->rigid_bodies[i].pose_stamped.pose.orientation.z,
                                                msg->rigid_bodies[i].pose_stamped.pose.orientation.w);
-      RCLCPP_DEBUG(this->get_logger(), "Transformation matrix from Rigid body %ld to motive frame.\n", msg->rigid_bodies[i].id);
-      RCLCPP_DEBUG(this->get_logger(), (static_cast<std::ostringstream&&>(std::ostringstream() << T_0_P)).str().c_str());
+      //RCLCPP_DEBUG(this->get_logger(), "Transformation matrix from Rigid body %ld to motion capture frame.\n", msg->rigid_bodies[i].id);
+      //RCLCPP_DEBUG(this->get_logger(), (static_cast<std::ostringstream&&>(std::ostringstream() << T_M_B)).str().c_str());
       //Compute the pose of the body in the robot base frame using T_0_M
-      T_0_P = T_0_M*T_0_P;
+      T_0_B = T_0_M*T_M_B;
       RCLCPP_DEBUG(this->get_logger(), "Transformation matrix from Rigid body %ld to robot base.\n", msg->rigid_bodies[i].id);
-      RCLCPP_DEBUG(this->get_logger(), (static_cast<std::ostringstream&&>(std::ostringstream() << T_0_P)).str().c_str());
+      RCLCPP_DEBUG(this->get_logger(), (static_cast<std::ostringstream&&>(std::ostringstream() << T_0_B)).str().c_str());
       //
-      //Save the tranformed pose in the new message
+      /*Save the tranformed pose in the new message*/
       mocap_optitrack_interfaces::msg::RigidBody rb = msg->rigid_bodies[i];
-      rb.pose_stamped.pose.position.x = T_0_P(0, 3);
-      rb.pose_stamped.pose.position.y = T_0_P(1, 3);
-      rb.pose_stamped.pose.position.z = T_0_P(2, 3);
-      q = this->rotmToQuat(T_0_P.block<3,3>(0,0));
+      //Store the position
+      rb.pose_stamped.pose.position.x = T_0_B(0, 3);
+      rb.pose_stamped.pose.position.y = T_0_B(1, 3);
+      rb.pose_stamped.pose.position.z = T_0_B(2, 3);
+      //Store the attitude through the unit quaternion
+      q = this->rotmToQuat(T_0_B.block<3,3>(0,0));
       rb.pose_stamped.pose.orientation.x = q(0);
       rb.pose_stamped.pose.orientation.y = q(1);
       rb.pose_stamped.pose.orientation.z = q(2);
       rb.pose_stamped.pose.orientation.w = q(3);
-      //
-      // Add the current rigid body to the array of rigid bodies
+      //Push the message to the array of messages to send
       msg_r.rigid_bodies.push_back(rb);
   }
   //
