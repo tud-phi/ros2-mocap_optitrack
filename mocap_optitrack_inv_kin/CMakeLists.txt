@@ -22,7 +22,7 @@ find_package(mocap_optitrack_interfaces REQUIRED)
 include_directories(include)
 
 #Create the executables
-add_executable(mocap_optitrack_inv_kin src/InverseKinematicsNode.cpp src/InverseKinematics.cpp)
+add_executable(mocap_optitrack_inv_kin src/InverseKinematicsNode.cpp src/InverseKinematics.cpp src/InverseKinematics3D.cpp)
 ament_target_dependencies(mocap_optitrack_inv_kin rclcpp mocap_optitrack_interfaces)
 
 install(TARGETS 

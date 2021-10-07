@@ -1,5 +1,6 @@
 #include <InverseKinematicsNode.h>
 #include <InverseKinematics.h>
+#include <InverseKinematics3D.h>
 
 //Class constructor
 InverseKinematicsNode::InverseKinematicsNode(): Node("inverse_kinematics")
@@ -29,7 +30,7 @@ InverseKinematicsNode::InverseKinematicsNode(): Node("inverse_kinematics")
     this->publisher_ = this->create_publisher<mocap_optitrack_interfaces::msg::ConfigurationArray>(pub_topic, 10);
     //
     //Create the node responsible of handling the inverse kinematics
-    this->ik = std::unique_ptr<InverseKinematics>(new InverseKinematics(this));
+    this->ik = std::unique_ptr<InverseKinematics>(new InverseKinematics3D(this));
     //
     //Log data
     RCLCPP_INFO(this->get_logger(), "Created IK node. Listening for incoming data...\n");
