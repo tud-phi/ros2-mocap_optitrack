@@ -17,12 +17,10 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
                           std::vector<double> &ds,
                           std::vector<double> &Ls) const
 {
-    //Sort the rigid bodies in the message so that its all consistent with the parameters
+    /*Variables initialization*/
+    //Sort the rigid bodies in the message so that its all consistent with the parameters provided thrpugh the yaml file
     std::vector<mocap_optitrack_interfaces::msg::RigidBody> RBs = getSorteredBodies(msg, ring_ids);
     //
-    /*Run the inverse kinematics*/
-    //
-    //Initialize the variables
     int i, k = 0;
     int nRB = (int) RBs.size();//number of rigid bodies
     //Allocate the vector of configuration variables to be returned
@@ -30,12 +28,12 @@ Eigen::VectorXf InverseKinematics::getConfiguration(const mocap_optitrack_interf
     //Auxiliary variables
     Eigen::Matrix3f R_i_1_ri;
     Eigen::Vector3f t_i_1_ri;
-    Eigen::Matrix4f T_0_i_1;
-    T_0_i_1 << 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1;//Initialize to the identity matrix. TODO: clean the code and make with Identity function of eigen
+    Eigen::Matrix4f T_0_i_1; T_0_i_1 << 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1;
     double D_c_ri, delta_L_ri, Delta_x_ri, Delta_y_ri, L_factor, Delta_i, Delta_i2, ci, si, scf;
+    //Epsilon quantity for limit computations, i.e. around 0
     float eps = std::numeric_limits<float>::epsilon();
     //
-    //Run the IK
+    /*Run the 3D inverse kinematics*/
     for (i = 0; i < nRB; i++ )
     {
         R_i_1_ri = T_0_i_1.block<3,3>(0,0).transpose()*this->quatToRotm(RBs[i].pose_stamped.pose.orientation.x,
