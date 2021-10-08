@@ -43,7 +43,7 @@ MoCapPublisher::MoCapPublisher(): Node("natnet_client")
   //TO REMOVE
   std::string address_;
   this->get_parameter("server_address", address_);
-  std::cout << address_ << std::endl;
+  RCLCPP_INFO(this->get_logger(),address_.c_str());
 }
 
 // Method that send over the ROS network the data of a rigid body
