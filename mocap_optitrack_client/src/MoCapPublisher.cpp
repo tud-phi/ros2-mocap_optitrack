@@ -39,6 +39,11 @@ MoCapPublisher::MoCapPublisher(): Node("natnet_client")
   //
   //Log info about creation
   RCLCPP_INFO(this->get_logger(), "Created MoCap publisher node.\n");
+
+  //TO REMOVE
+  std::string address_;
+  this->get_parameter("server_address", address_);
+  std::cout << address_ << std::endl;
 }
 
 // Method that send over the ROS network the data of a rigid body
