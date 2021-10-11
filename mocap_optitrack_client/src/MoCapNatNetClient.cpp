@@ -237,23 +237,18 @@ void NATNET_CALLCONV dataFrameHandler(sFrameOfMocapData* data, void* pUserData)
 	}
     //
 	// labeled markers - this includes all markers (Active, Passive, and 'unlabeled' (markers with no asset but a PointCloud ID)
-    bool bOccluded;     // marker was not visible (occluded) in this frame
-    bool bPCSolved;     // reported position provided by point cloud solve
-    bool bModelSolved;  // reported position provided by model solve
-    bool bHasModel;     // marker has an associated asset in the data stream
-    bool bUnlabeled;    // marker is 'unlabeled', but has a point cloud ID that matches Motive PointCloud ID (In Motive 3D View)
-	bool bActiveMarker; // marker is an actively labeled LED marker
     //
     //
 	RCLCPP_DEBUG(pClient->getPublisher()->get_logger(), "Markers [Count=%d]\n", data->nLabeledMarkers);
 	for(i=0; i < data->nLabeledMarkers; i++)
 	{
-        bOccluded = ((data->LabeledMarkers[i].params & 0x01)!=0);
-        bPCSolved = ((data->LabeledMarkers[i].params & 0x02)!=0);
-        bModelSolved = ((data->LabeledMarkers[i].params & 0x04) != 0);
-        bHasModel = ((data->LabeledMarkers[i].params & 0x08) != 0);
-        bUnlabeled = ((data->LabeledMarkers[i].params & 0x10) != 0);
-		bActiveMarker = ((data->LabeledMarkers[i].params & 0x20) != 0);
+        //Commented below some additional boolean variables about the markers
+        //bool bOccluded = ((data->LabeledMarkers[i].params & 0x01)!=0);// marker was not visible (occluded) in this frame
+        //bool bPCSolved = ((data->LabeledMarkers[i].params & 0x02)!=0);// reported position provided by point cloud solve
+        //bool bModelSolved = ((data->LabeledMarkers[i].params & 0x04) != 0);// reported position provided by model solve
+        //bool bHasModel = ((data->LabeledMarkers[i].params & 0x08) != 0);// marker has an associated asset in the data stream
+        bool bUnlabeled = ((data->LabeledMarkers[i].params & 0x10) != 0);// marker is 'unlabeled', but has a point cloud ID that matches Motive PointCloud ID (In Motive 3D View)
+		bool bActiveMarker = ((data->LabeledMarkers[i].params & 0x20) != 0);// marker is an actively labeled LED marker
         //
         sMarker marker = data->LabeledMarkers[i];
         //
