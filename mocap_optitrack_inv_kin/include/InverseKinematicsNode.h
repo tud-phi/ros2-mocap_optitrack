@@ -22,6 +22,11 @@ private:
     rclcpp::Publisher<mocap_optitrack_interfaces::msg::ConfigurationArray>::SharedPtr publisher_;
     std::unique_ptr<InverseKinematics> ik;
 
+    //DA RIMUOVERE
+    rclcpp::TimerBase::SharedPtr timer_;
+    void timer_callback();
+    //
+
 public:
     //Methods
     InverseKinematicsNode();

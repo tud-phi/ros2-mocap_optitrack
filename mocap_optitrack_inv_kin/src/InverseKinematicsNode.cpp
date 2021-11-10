@@ -3,6 +3,15 @@
 #include <InverseKinematics3D.h>
 #include <InverseKinematics2D.h>
 
+// DA RIMUOVERE PER PROVA
+#include <chrono>
+#include <functional>
+#include <memory>
+#include <string>
+using namespace std::chrono_literals;
+//
+
+
 //Class constructor
 InverseKinematicsNode::InverseKinematicsNode(): Node("inverse_kinematics")
 {
@@ -43,12 +52,34 @@ InverseKinematicsNode::InverseKinematicsNode(): Node("inverse_kinematics")
             RCLCPP_INFO(this->get_logger(), "Created 3D IK node. Listening for incoming data...\n");
             this->ik = std::unique_ptr<InverseKinematics>(new InverseKinematics3D(this));
     }
+
+    // PROVA DA RIMUOVERE
+    //timer_ = this->create_wall_timer(500ms, std::bind(&InverseKinematicsNode::timer_callback, this));
 }
+
+// DA RIMUOVERE
+void InverseKinematicsNode::timer_callback()
+{
+    // Creazione del messaggio
+    mocap_optitrack_interfaces::msg::ConfigurationArray msg;
+    mocap_optitrack_interfaces::msg::Configuration c1, c2, c3;
+    c1.delta_x = -1;c1.delta_y = 2;c1.delta_l = 3;
+    c2.delta_x = 0;c2.delta_y = 2;c2.delta_l = 4;
+    c3.delta_x = 1000;c3.delta_y = -20;c3.delta_l = 40;
+    
+    msg.configurations.push_back(c1);
+    msg.configurations.push_back(c2);
+    msg.configurations.push_back(c3);
+
+    RCLCPP_INFO(this->get_logger(), "Publishing the configuration...");
+    publisher_->publish(msg);
+}
+//
 
 //Topic to receive the message of rigid bodies
 void InverseKinematicsNode::rigid_body_topic_callback(const mocap_optitrack_interfaces::msg::RigidBodyArray::SharedPtr msg) const
 {
-    //RCLCPP_INFO(this->get_logger(), "Receceived message on rigid bodies...\n");
+    RCLCPP_INFO(this->get_logger(), "Receceived message on rigid bodies.\n");
     //Retreive the parameters and perform the inverse kinematics
     std::vector<long int> IDs;
     this->get_parameter("ring_ids", IDs);
@@ -58,9 +89,25 @@ void InverseKinematicsNode::rigid_body_topic_callback(const mocap_optitrack_inte
     this->get_parameter("ring_ds", ds);
     std::vector<double> Ls;
     this->get_parameter("segment_ls", Ls);
+
     //
     //Call the inverse kinematics to get the configuration
     Eigen::VectorXf q = this->ik->getConfiguration(msg, IDs, ls, ds, Ls);
+
+    //Create the message of configurations and publish it
+    mocap_optitrack_interfaces::msg::ConfigurationArray q_msg;
+    int msg_size = (int) q.rows()/3;
+    q_msg.configurations = std::vector<mocap_optitrack_interfaces::msg::Configuration>(msg_size);
+    int i= 0, k = 0;
+    for (; i < msg_size; i++)
+    {
+        q_msg.configurations[i].delta_x = q(k);
+        q_msg.configurations[i].delta_y = q(k+1);
+        q_msg.configurations[i].delta_l = q(k+2);
+        k = k+3;
+    }
+    //Publish the message
+    this->publisher_->publish(q_msg);
 }
 
 int main(int argc, char ** argv)

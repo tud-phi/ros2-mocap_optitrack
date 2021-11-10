@@ -6,7 +6,7 @@ natnet_client:
     #Set to "host.docker.internal" if the node runs in a docker container on the same machine of the NatNet server.
     #If, in addition, the container is hosted on a linux machine be sure to run the docker
     #container with the option : --add-host host.docker.internal:host-gateway.
-    server_address: "10.125.37.1"
+    server_address: "192.168.4.21"
     #Type of the connection: 0 = multicase, 1 = unicast.
     connection_type: 0 #default value: 0
     #Multicast address of the server
