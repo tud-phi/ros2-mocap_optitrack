@@ -4,7 +4,8 @@
   <name>mocap_optitrack_interfaces</name>
   <version>0.0.1</version>
   <description>Package containing the definition of the ROS2 interfaces used by the motion capture system.</description>
-  <maintainer email="pietro.pustina@gmail.com">Pietro Pustina</maintainer>
+  <author email="pietro.pustina@gmail.com">Pietro Pustina</author>
+  <maintainer email="maximilian@stoelzle.ch">Maximilian Stölzle</maintainer>
   <license>MIT license</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
