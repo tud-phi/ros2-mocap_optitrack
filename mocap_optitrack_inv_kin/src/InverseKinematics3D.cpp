@@ -56,7 +56,7 @@ Eigen::VectorXf InverseKinematics3D::getConfiguration(const mocap_optitrack_inte
         }
         delta_L_ri = t_i_1_ri(2)*(acos(R_i_1_ri(2,2)))/(sin(acos(R_i_1_ri(2,2))))-ls[i];
         //
-        D_c_ri = ds[i]/(ls[i]+delta_L_ri)*(pow(acos(R_i_1_ri(2,2)), 2)/(R_i_1_ri(2,2)-1));
+        D_c_ri = ds[i]/(ls[i]+delta_L_ri)*(pow(acos(R_i_1_ri(2,2)), 2)/(1-R_i_1_ri(2,2)));
         Delta_x_ri = t_i_1_ri(0)*D_c_ri;
         Delta_y_ri = t_i_1_ri(1)*D_c_ri;
         //
