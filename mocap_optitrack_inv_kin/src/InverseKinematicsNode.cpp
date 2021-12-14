@@ -93,7 +93,9 @@ void InverseKinematicsNode::rigid_body_topic_callback(const mocap_optitrack_inte
     //
     //Call the inverse kinematics to get the configuration
     Eigen::VectorXf q = this->ik->getConfiguration(msg, IDs, ls, ds, Ls);
-
+    std::cout << "Configuration:" << std::endl;
+    std::cout << q << std::endl;
+    //TODO: must generalize to handle also the 2D case. For the case of NoElongation delta_l is just 0.
     //Create the message of configurations and publish it
     mocap_optitrack_interfaces::msg::ConfigurationArray q_msg;
     int msg_size = (int) q.rows()/3;

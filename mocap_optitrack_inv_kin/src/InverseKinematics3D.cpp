@@ -35,8 +35,9 @@ Eigen::VectorXf InverseKinematics3D::getConfiguration(const mocap_optitrack_inte
     //Transformation matrix from ring (i-1) to robot base frame
     Eigen::Matrix4f T_0_i_1; T_0_i_1 << 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1;
     double D_c_ri, delta_L_ri, Delta_x_ri, Delta_y_ri, L_factor, Delta_i, Delta_i2, ci, si, scf;
-    //Epsilon quantity for limit computations, i.e. around 0
-    float eps = std::numeric_limits<float>::epsilon();
+    //Epsilon quantity for limit computations, i.e. around 0. 
+    //Adjust this parameter if the configuration is attaing unrelastic values.
+    float eps = pow(10,3)*std::numeric_limits<float>::epsilon();
     //
     /*Run the 3D inverse kinematics*/
     for (i = 0; i < nRB; i++ )
@@ -52,7 +53,9 @@ Eigen::VectorXf InverseKinematics3D::getConfiguration(const mocap_optitrack_inte
         //Approximate 1 with 1-eps to run the limit (straight configuration)
         if(std::abs(R_i_1_ri(2,2)) >= 1)
         {
-            R_i_1_ri(2,2) = R_i_1_ri(2,2) + pow(10,3)*eps*((R_i_1_ri(2,2) > 0) ? -1 : 1);
+            //std::cout << "Valore matrice di rotazione : " << std::endl;
+            //std::cout << R_i_1_ri(2,2) << std::endl;
+            R_i_1_ri(2,2) = R_i_1_ri(2,2) + eps*((R_i_1_ri(2,2) > 0) ? -1 : 1);
         }
         delta_L_ri = t_i_1_ri(2)*(acos(R_i_1_ri(2,2)))/(sin(acos(R_i_1_ri(2,2))))-ls[i];
         //
@@ -66,7 +69,7 @@ Eigen::VectorXf InverseKinematics3D::getConfiguration(const mocap_optitrack_inte
         //Update the transformation matrix
         Delta_i2= pow(q(k),2) + pow(q(k+1),2);
         //If Delta_i2 is too close to zero approximate with eps to compute the limit
-        if(std::abs(Delta_i2) < eps)
+        if(Delta_i2 < eps)
         {
             Delta_i2 = eps;
         }

@@ -7,8 +7,8 @@ world_to_base:
       base_qz: 0.0
       base_qw: 0.7071068
       initial_offset_x: 0.0
-      initial_offset_y: -0.019 #unit of measures are in [m]
+      initial_offset_y: -0.015 #-0.015for new base #-0.019 for old base #unit of measures are in [m]
       initial_offset_z: 0.0
-      base_id: 1 #motive ID of the robot base
+      base_id: 3 #motive ID of the robot base
       sub_topic: "mocap_rigid_bodies"
       pub_topic: "baseframe_rigid_bodies"
