@@ -53,8 +53,6 @@ Eigen::VectorXf InverseKinematics3D::getConfiguration(const mocap_optitrack_inte
         //Approximate 1 with 1-eps to run the limit (straight configuration)
         if(std::abs(R_i_1_ri(2,2)) >= 1)
         {
-            //std::cout << "Valore matrice di rotazione : " << std::endl;
-            //std::cout << R_i_1_ri(2,2) << std::endl;
             R_i_1_ri(2,2) = R_i_1_ri(2,2) + eps*((R_i_1_ri(2,2) > 0) ? -1 : 1);
         }
         delta_L_ri = t_i_1_ri(2)*(acos(R_i_1_ri(2,2)))/(sin(acos(R_i_1_ri(2,2))))-ls[i];
