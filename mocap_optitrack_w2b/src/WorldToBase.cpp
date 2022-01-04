@@ -144,7 +144,7 @@ void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::Ri
       rb.pose_stamped.pose.position.y = T_0_B(1, 3);
       rb.pose_stamped.pose.position.z = T_0_B(2, 3);
       //Store the attitude through the unit quaternion
-      q = this->rotmToQuat(T_0_B.block<3,3>(0,0));
+      q = this->rotmToQuat(T_0_M.block<3,3>(0,0)*T_M_B.block<3,3>(0,0)*T_0_M.block<3,3>(0,0).transpose());
       rb.pose_stamped.pose.orientation.x = q(0);
       rb.pose_stamped.pose.orientation.y = q(1);
       rb.pose_stamped.pose.orientation.z = q(2);
