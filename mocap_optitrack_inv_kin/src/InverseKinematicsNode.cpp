@@ -16,14 +16,15 @@ using namespace std::chrono_literals;
 InverseKinematicsNode::InverseKinematicsNode(): Node("inverse_kinematics")
 {
     //Declare the parameters of the node
-    //this->declare_parameter<std::vector<long int>>("ring_ids");
-    //this->declare_parameter<double>("ring_ls");
-    //this->declare_parameter<double>("ring_ds");
-    //this->declare_parameter<double>("segment_ls");
-    this->declare_parameter("ring_ids");
-    this->declare_parameter("ring_ls");
-    this->declare_parameter("ring_ds");
-    this->declare_parameter("segment_ls");
+    this->declare_parameter<std::vector<long int>>("ring_ids");
+    this->declare_parameter<std::vector<double>>("ring_ls");
+    this->declare_parameter<std::vector<double>>("ring_ds");
+    this->declare_parameter<std::vector<double>>("segment_ls");
+    // this->declare_parameter("ring_ids");
+    // this->declare_parameter("ring_ls");
+    // this->declare_parameter("ring_ds");
+    // this->declare_parameter("segment_ls");
+    
     this->declare_parameter<int>("base_id", 0);
     this->declare_parameter<int>("2d_inverse_kinematics", 0);
     this->declare_parameter<std::string>("sub_topic", "baseframe_rigid_bodies");
