@@ -4,16 +4,23 @@
 // Include standard libraries
 #include <stdio.h>
 #include <unistd.h>
-#include <memory>
+#include <algorithm>
 #include <chrono>
 #include <functional>
+#include <memory>
 #include <string>
+#include <vector>
 // Include the MoCap NatNet client
 #include <MoCapNatNetClient.h>
 
 using namespace std;
 using namespace std::chrono_literals;
 using namespace std::chrono;
+
+bool cmpRigidBodyId(sRigidBodyData body_a, sRigidBodyData body_b)
+{
+  return body_a.ID < body_b.ID;
+}
 
 MoCapPublisher::MoCapPublisher(): Node("natnet_client")
 {
@@ -47,8 +54,17 @@ MoCapPublisher::MoCapPublisher(): Node("natnet_client")
 }
 
 // Method that send over the ROS network the data of a rigid body
-void MoCapPublisher::sendRigidBodyMessage(sRigidBodyData* bodies, int nRigidBodies)
+void MoCapPublisher::sendRigidBodyMessage(sRigidBodyData* bodies_ptr, int nRigidBodies)
 {
+  std::vector<sRigidBodyData> bodies;
+  for(int i=0; i < nRigidBodies; i++) 
+  {
+    bodies.push_back(bodies_ptr[i]);
+  }
+
+  // sort rigid bodies by their id
+  std::sort(bodies.begin(), bodies.end(), cmpRigidBodyId);
+
   //Instanciate variables
   mocap_optitrack_interfaces::msg::RigidBodyArray msg;
   high_resolution_clock::time_point t_current;
