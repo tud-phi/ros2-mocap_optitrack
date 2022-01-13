@@ -10,7 +10,7 @@ Source the built packages:
 . install/setup.bash
 ```
 
-Move to the source directory and run the system via the configuratin file:
+Move to the source directory and run the system via the configuration file:
 ```bash
 ros2 launch launch/launch_y_up.py
 ```
