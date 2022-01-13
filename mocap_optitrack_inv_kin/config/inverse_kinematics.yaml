@@ -1,11 +1,11 @@
 #Configuration file for inverse_kinematics_node
 inverse_kinematics:
   ros__parameters:
-      base_id: 3 #motive ID of the robot base
-      ring_ids: [4, 5] #motive ID of the rings of each segment, ordered from the robot base to te tip
-      ring_ls: [0.105, 0.105] #distance at rest of each ring from the base of the corresponding segment, ordered from robot base to the tip
+      base_id: 3 # motive ID of the robot base
+      ring_ids: [4, 5] # motive ID of the rings of each segment, ordered from the robot base to te tip
+      ring_ls: [0.105, 0.105] # distance at rest of each ring from the base of the corresponding segment, ordered from robot base to the tip
       ring_ds: [1.0, 1.0] # radius of the delta parametrization for each segment, ordered from the robot base to the tip
-      segment_ls: [0.11, 0.11] #length of each segment, ordered from the robot base to the tip
-      2d_inverse_kinematics: 0 #set to 1 to use the 2D inverse kinematics (planar motions), otherwise the 3D kinematics is used
+      segment_ls: [0.11, 0.11] # length of each segment, ordered from the robot base to the tip
+      2d_inverse_kinematics: 0 # set to 1 to use the 2D inverse kinematics (planar motions), otherwise the 3D kinematics is used
       sub_topic: "baseframe_rigid_bodies" 
       pub_topic: "robot_configuration"
