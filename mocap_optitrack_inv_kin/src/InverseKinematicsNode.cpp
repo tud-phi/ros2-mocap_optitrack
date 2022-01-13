@@ -26,7 +26,7 @@ InverseKinematicsNode::InverseKinematicsNode(): Node("inverse_kinematics")
     // this->declare_parameter("segment_ls");
     
     this->declare_parameter<int>("base_id", 0);
-    this->declare_parameter<int>("2d_inverse_kinematics", 0);
+    this->declare_parameter<bool>("2d_inverse_kinematics", false);
     this->declare_parameter<std::string>("sub_topic", "baseframe_rigid_bodies");
     this->declare_parameter<std::string>("pub_topic", "robot_configuration");
     //
@@ -46,10 +46,10 @@ InverseKinematicsNode::InverseKinematicsNode(): Node("inverse_kinematics")
     this->publisher_ = this->create_publisher<mocap_optitrack_interfaces::msg::ConfigurationArray>(pub_topic, 10);
     //
     //Create the node responsible of handling the inverse kinematics
-    int IK_type;
+    bool IK_type;
     this->get_parameter("2d_inverse_kinematics", IK_type);
     switch (IK_type){
-        case 1:
+        case true:
             RCLCPP_INFO(this->get_logger(), "Created 2D IK node. Listening for incoming data...\n");
             this->ik = std::unique_ptr<InverseKinematics>(new InverseKinematics2D(this));
             break;

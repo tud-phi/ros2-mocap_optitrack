@@ -6,6 +6,6 @@ inverse_kinematics:
       ring_ls: [0.105, 0.105] # distance at rest of each ring from the base of the corresponding segment, ordered from robot base to the tip
       ring_ds: [1.0, 1.0] # radius of the delta parametrization for each segment, ordered from the robot base to the tip
       segment_ls: [0.11, 0.11] # length of each segment, ordered from the robot base to the tip
-      2d_inverse_kinematics: 0 # set to 1 to use the 2D inverse kinematics (planar motions), otherwise the 3D kinematics is used
+      2d_inverse_kinematics: False # set to True to use the 2D inverse kinematics (planar motions), otherwise the 3D kinematics is used
       sub_topic: "baseframe_rigid_bodies" 
       pub_topic: "robot_configuration"
