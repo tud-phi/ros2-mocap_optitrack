@@ -131,6 +131,11 @@ void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::Ri
                                                msg->rigid_bodies[i].pose_stamped.pose.orientation.y,
                                                msg->rigid_bodies[i].pose_stamped.pose.orientation.z,
                                                msg->rigid_bodies[i].pose_stamped.pose.orientation.w);
+                                               
+      // We need to invert the rotation as somehow the MoCap measures the rotation from the rotated frame of the rigid body back to its initial frame,
+      // instead of (e.g. what we want) computing the rotation from the initial frame to the rotated frame of the rigid body.
+      T_M_B.block<3,3>(0,0) = T_M_B.block<3,3>(0,0).transpose();
+
       //
       //Compute the pose of the body in the robot base frame using T_0_M
       T_0_B = T_0_M*T_M_B;
