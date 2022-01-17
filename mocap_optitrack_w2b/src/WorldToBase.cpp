@@ -65,8 +65,11 @@ void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::Ri
   Matrix4f T_W_0, T_0_W; T_W_0  << 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1; T_0_W = T_W_0;
   // Transformation matrix from the robot base frame to the (generic) rigid body frame
   Matrix4f T_0_B; T_0_B  << 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1;
-  // Transformation matrix from the world frame to the (generic) rigid body frame
-  Matrix4f T_W_B; T_W_B  << 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1;
+  // Transformation matrix from the world frame to the (generic) rigid body frame as initialised by MoCap (\tilde{B})
+  Matrix4f T_W_Btilde; T_W_Btilde  << 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1;
+  // Transformation matrix the rigid body frame as initialised by the MoCap to be aligned with the world frame on creation 
+  // to the rigid body frame initialised to be aligned with the base frame in straight configuration
+  Matrix4f T_Btilde_B; T_Btilde_B  << 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1;
   //
   int i,i_base = -1;//i is the iterator, i_base is the index position in the RigidBodyArray 
   int nRB = (int) msg->rigid_bodies.size();
@@ -124,33 +127,38 @@ void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::Ri
   /* Get the transformation matrix from the robot base frame to the world frame by inverting T_W_0 */
   T_0_W.block<3,3>(0,0) = T_W_0.block<3,3>(0,0).transpose();
   T_0_W.block<3,1>(0,3) = -T_0_W.block<3,3>(0,0)*T_W_0.block<3,1>(0,3);
-  RCLCPP_DEBUG(this->get_logger(), "Transformation matrix from motive frame to robot base : \n"); 
-  RCLCPP_DEBUG(this->get_logger(), (static_cast<std::ostringstream&&>(std::ostringstream() << T_0_W)).str().c_str()); 
+  // RCLCPP_DEBUG(this->get_logger(), "Transformation matrix from the robot base frame to the world frame: \n"); 
+  // RCLCPP_DEBUG(this->get_logger(), (static_cast<std::ostringstream&&>(std::ostringstream() << T_0_W)).str().c_str()); 
+
+  // Compute the rotation of the rigid body frame from \tilde{B} to B
+  // e.g. we switch from a y-up initialised body frame to z-up initialised body frame
+  T_Btilde_B.block<3,3>(0,0) = T_W_0.block<3,3>(0,0);
+
   //
   /* Compute the pose of each rigid body in the robot base frame */
   for (i = 0; i < nRB; i++)
   {
-      //Print some information
+      // Print some information
       RCLCPP_DEBUG(this->get_logger(), "ID : %ld\n", msg->rigid_bodies[i].id);
       RCLCPP_DEBUG(this->get_logger(), "Time stamp : %d(s)---%d(ns)\n", msg->rigid_bodies[i].pose_stamped.header.stamp.sec, msg->rigid_bodies[i].pose_stamped.header.stamp.nanosec);
       //
-      //Get the pose of each rigid body in the motive frame
-      T_W_B(0, 3) = msg->rigid_bodies[i].pose_stamped.pose.position.x;
-      T_W_B(1, 3) = msg->rigid_bodies[i].pose_stamped.pose.position.y;
-      T_W_B(2, 3) = msg->rigid_bodies[i].pose_stamped.pose.position.z;
-      T_W_B.block<3,3>(0,0) = this->quatToRotm(msg->rigid_bodies[i].pose_stamped.pose.orientation.x,
-                                               msg->rigid_bodies[i].pose_stamped.pose.orientation.y,
-                                               msg->rigid_bodies[i].pose_stamped.pose.orientation.z,
-                                               msg->rigid_bodies[i].pose_stamped.pose.orientation.w);
+      // Get the pose of each rigid body in the motive frame
+      T_W_Btilde(0, 3) = msg->rigid_bodies[i].pose_stamped.pose.position.x;
+      T_W_Btilde(1, 3) = msg->rigid_bodies[i].pose_stamped.pose.position.y;
+      T_W_Btilde(2, 3) = msg->rigid_bodies[i].pose_stamped.pose.position.z;
+      T_W_Btilde.block<3,3>(0,0) = this->quatToRotm(msg->rigid_bodies[i].pose_stamped.pose.orientation.x,
+                                                    msg->rigid_bodies[i].pose_stamped.pose.orientation.y,
+                                                    msg->rigid_bodies[i].pose_stamped.pose.orientation.z,
+                                                    msg->rigid_bodies[i].pose_stamped.pose.orientation.w);
                                                
       // We need to invert the rotation as somehow the MoCap measures the rotation from the rotated frame of the rigid body back to its initial frame,
       // instead of (e.g. what we want) computing the rotation from the initial frame to the rotated frame of the rigid body.
-      T_W_B.block<3,3>(0,0) = T_W_B.block<3,3>(0,0).transpose();
+      T_W_Btilde.block<3,3>(0,0) = T_W_Btilde.block<3,3>(0,0).transpose();
 
       //
       // Compute the pose of the body in the robot base frame using T_0_W
-      T_0_B = T_0_W*T_W_B;
-      RCLCPP_DEBUG(this->get_logger(), "Transformation matrix from Rigid body %ld to robot base.\n", msg->rigid_bodies[i].id);
+      T_0_B = T_0_W * T_W_Btilde * T_Btilde_B;
+      RCLCPP_DEBUG(this->get_logger(), "Transformation matrix from the robot base to the rigid body %ld.\n", msg->rigid_bodies[i].id);
       RCLCPP_DEBUG(this->get_logger(), (static_cast<std::ostringstream&&>(std::ostringstream() << T_0_B)).str().c_str());
       //
       /* Save the tranformed pose in the new message*/
@@ -160,7 +168,7 @@ void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::Ri
       rb.pose_stamped.pose.position.y = T_0_B(1, 3);
       rb.pose_stamped.pose.position.z = T_0_B(2, 3);
       // Store the orientation through the unit quaternion
-      xi_0_B = this->rotmToQuat(T_0_W.block<3,3>(0,0)*T_W_B.block<3,3>(0,0)*T_0_W.block<3,3>(0,0).transpose());
+      xi_0_B = this->rotmToQuat(T_0_B.block<3,3>(0,0));
       rb.pose_stamped.pose.orientation.x = xi_0_B(0);
       rb.pose_stamped.pose.orientation.y = xi_0_B(1);
       rb.pose_stamped.pose.orientation.z = xi_0_B(2);
