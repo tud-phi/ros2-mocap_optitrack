@@ -56,13 +56,17 @@ void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::Ri
   // Position of the robot base recorded by the motion capture system
   Vector3f t_W_0bar; t_W_0bar << 0,0,0;
   // Orientation of the robot base recorded by the motion capture system
-  Matrix3f R_W_0tilde; R_W_0tilde << 0,0,0,0,0,0,0,0,0;
+  Matrix3f R_W_0tilde; R_W_0tilde << 1,0,0,0,1,0,0,0,1;
+  // Transformation matrix from the world frame to the \bar{0} frame (e.g. mo-cap markers on the robot base holder)
+  Matrix4f T_W_0bar; T_W_0bar  << 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1;
+  // Transformation matrix from the \bar{0} frame (e.g. mo-cap markers on the robot base holder) to the base frame
+  Matrix4f T_0bar_0; T_0bar_0  << 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1;
   // Transformation matrix from the world frame (e.g. motion capture frame) to the robot base frame and inverse
-  Matrix4f T_W_0, T_0_W; T_W_0  << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1; T_0_W = T_W_0;
+  Matrix4f T_W_0, T_0_W; T_W_0  << 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1; T_0_W = T_W_0;
   // Transformation matrix from the robot base frame to the (generic) rigid body frame
-  Matrix4f T_0_B; T_0_B  << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1;
+  Matrix4f T_0_B; T_0_B  << 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1;
   // Transformation matrix from the world frame to the (generic) rigid body frame
-  Matrix4f T_W_B; T_W_B  << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1;
+  Matrix4f T_W_B; T_W_B  << 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1;
   //
   int i,i_base = -1;//i is the iterator, i_base is the index position in the RigidBodyArray 
   int nRB = (int) msg->rigid_bodies.size();
@@ -105,10 +109,14 @@ void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::Ri
     RCLCPP_ERROR(this->get_logger(), "Rigid body of the base not found.\n");
     throw std::runtime_error("Could not transform pose estimates from world to robot base frame as did not find rigid body representing the base holder.");
   }
-  // Store the pose of the robot base in the motion capture system
-  T_W_0.block<3,3>(0,0) = quatToRotm(base_qx, base_qy, base_qz, base_qw);
-  T_W_0.block<3,1>(0,3) << initial_offset_x, initial_offset_y, initial_offset_z;
-  T_W_0.block<3,1>(0,3) += t_W_0bar;
+  // Store the rotation from the world frame to the base frame
+  T_W_0bar.block<3,3>(0,0) = quatToRotm(base_qx, base_qy, base_qz, base_qw);
+  // Store the translation from the world frame to the \Bar{0} frame (markers attached to base holder)
+  T_W_0bar.block<3,1>(0,3) = t_W_0bar;
+  // Store the translation from the \Bar{0} frame (markers attached to base holder) to the base of the proximale segment (e.g. base frame)
+  T_0bar_0.block<3,1>(0,3) << initial_offset_x, initial_offset_y, initial_offset_z;
+  // Compute the resulting transformation  matrix from the world frame to the robot base frame
+  T_W_0 = T_W_0bar*T_0bar_0;
   // Log transfromation matrix from the world frame to the robot base frame
   RCLCPP_DEBUG(this->get_logger(), "Transformation matrix from world frame to robot base frame: \n"); 
   RCLCPP_DEBUG(this->get_logger(), (static_cast<std::ostringstream&&>(std::ostringstream() << T_W_0)).str().c_str()); 
