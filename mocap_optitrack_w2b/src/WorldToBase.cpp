@@ -52,15 +52,15 @@ void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::Ri
 {
   /*Variables declaration*/
   // Position of the robot base recorded by the motion capture system
-  Vector3f P_base; P_base << 0,0,0;
+  Vector3f t_W_0bar; t_W_0bar << 0,0,0;
   // Orientation of the robot base recorded by the motion capture system
-  Matrix3f R_base; R_base << 0,0,0,0,0,0,0,0,0;
+  Matrix3f R_W_0tilde; R_W_0tilde << 0,0,0,0,0,0,0,0,0;
   // Transformation matrix from the robot base frame to the motion capture system and inverse
-  Matrix4f T_M_0, T_0_M; T_M_0  << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1; T_0_M = T_M_0;
+  Matrix4f T_W_0, T_0_W; T_W_0  << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1; T_0_W = T_W_0;
   // Transformation matrix from a (generic) rigid body frame to the robot base frame
   Matrix4f T_0_B; T_0_B  << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1;
   // Transformation matrix from a (generic) rigid body frame to the motion capture frame
-  Matrix4f T_M_B; T_M_B  << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1;
+  Matrix4f T_W_B; T_W_B  << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1;
   //
   int i,i_base = -1;//i is the iterator, i_base is the index position in the RigidBodyArray 
   int nRB = (int) msg->rigid_bodies.size();
@@ -78,7 +78,7 @@ void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::Ri
   this->get_parameter("initial_offset_y", initial_offset_y);
   this->get_parameter("initial_offset_z", initial_offset_z);
   //
-  Eigen::Vector4f q;//vector that represents a unit quaternion
+  Eigen::Vector4f xi_0_B;//vector that represents a unit quaternion
   mocap_optitrack_interfaces::msg::RigidBodyArray msg_r;//message to send over the ROS2 network with the modified poses
   //
   /*Get the pose of the base of the robot recorded by the motion capture system*/
@@ -88,11 +88,11 @@ void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::Ri
       {
         i_base = i;
         //Store the position of the robot base and the orientation
-        P_base << msg->rigid_bodies[i].pose_stamped.pose.position.x, msg->rigid_bodies[i].pose_stamped.pose.position.y, msg->rigid_bodies[i].pose_stamped.pose.position.z;
-        R_base = this->quatToRotm(msg->rigid_bodies[i].pose_stamped.pose.orientation.x,
-                                  msg->rigid_bodies[i].pose_stamped.pose.orientation.y,
-                                  msg->rigid_bodies[i].pose_stamped.pose.orientation.z,
-                                  msg->rigid_bodies[i].pose_stamped.pose.orientation.w);
+        t_W_0bar << msg->rigid_bodies[i].pose_stamped.pose.position.x, msg->rigid_bodies[i].pose_stamped.pose.position.y, msg->rigid_bodies[i].pose_stamped.pose.position.z;
+        R_W_0tilde = this->quatToRotm(msg->rigid_bodies[i].pose_stamped.pose.orientation.x,
+                                      msg->rigid_bodies[i].pose_stamped.pose.orientation.y,
+                                      msg->rigid_bodies[i].pose_stamped.pose.orientation.z,
+                                      msg->rigid_bodies[i].pose_stamped.pose.orientation.w);
         break;
       }
   }
@@ -103,18 +103,18 @@ void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::Ri
     RCLCPP_ERROR(this->get_logger(), "Rigid body of the base not found.\n");
   }
   //Store the pose of the robot base in the motion capture system
-  T_M_0.block<3,3>(0,0) = quatToRotm(base_qx, base_qy, base_qz, base_qw);
-  T_M_0.block<3,1>(0,3) << initial_offset_x, initial_offset_y, initial_offset_z;
-  T_M_0.block<3,1>(0,3) += P_base;
+  T_W_0.block<3,3>(0,0) = quatToRotm(base_qx, base_qy, base_qz, base_qw);
+  T_W_0.block<3,1>(0,3) << initial_offset_x, initial_offset_y, initial_offset_z;
+  T_W_0.block<3,1>(0,3) += t_W_0bar;
   //Log some stuff
   RCLCPP_DEBUG(this->get_logger(), "Transformation matrix from robot base frame to motive : \n"); 
-  RCLCPP_DEBUG(this->get_logger(), (static_cast<std::ostringstream&&>(std::ostringstream() << T_M_0)).str().c_str()); 
+  RCLCPP_DEBUG(this->get_logger(), (static_cast<std::ostringstream&&>(std::ostringstream() << T_W_0)).str().c_str()); 
   //
-  /*Get the transformation matrix from the motive to robot base frame inverting T_M_0*/
-  T_0_M.block<3,3>(0,0) = T_M_0.block<3,3>(0,0).transpose();
-  T_0_M.block<3,1>(0,3) = -T_0_M.block<3,3>(0,0)*T_M_0.block<3,1>(0,3);
+  /*Get the transformation matrix from the motive to robot base frame inverting T_W_0*/
+  T_0_W.block<3,3>(0,0) = T_W_0.block<3,3>(0,0).transpose();
+  T_0_W.block<3,1>(0,3) = -T_0_W.block<3,3>(0,0)*T_W_0.block<3,1>(0,3);
   RCLCPP_DEBUG(this->get_logger(), "Transformation matrix from motive frame to robot base : \n"); 
-  RCLCPP_DEBUG(this->get_logger(), (static_cast<std::ostringstream&&>(std::ostringstream() << T_0_M)).str().c_str()); 
+  RCLCPP_DEBUG(this->get_logger(), (static_cast<std::ostringstream&&>(std::ostringstream() << T_0_W)).str().c_str()); 
   //
   /*Compute the pose of each rigid body in the robot base frame*/
   for (i = 0; i < nRB; i++)
@@ -124,21 +124,21 @@ void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::Ri
       RCLCPP_DEBUG(this->get_logger(), "Time stamp : %d(s)---%d(ns)\n", msg->rigid_bodies[i].pose_stamped.header.stamp.sec, msg->rigid_bodies[i].pose_stamped.header.stamp.nanosec);
       //
       //Get the pose of each rigid body in the motive frame
-      T_M_B(0, 3) = msg->rigid_bodies[i].pose_stamped.pose.position.x;
-      T_M_B(1, 3) = msg->rigid_bodies[i].pose_stamped.pose.position.y;
-      T_M_B(2, 3) = msg->rigid_bodies[i].pose_stamped.pose.position.z;
-      T_M_B.block<3,3>(0,0) = this->quatToRotm(msg->rigid_bodies[i].pose_stamped.pose.orientation.x,
+      T_W_B(0, 3) = msg->rigid_bodies[i].pose_stamped.pose.position.x;
+      T_W_B(1, 3) = msg->rigid_bodies[i].pose_stamped.pose.position.y;
+      T_W_B(2, 3) = msg->rigid_bodies[i].pose_stamped.pose.position.z;
+      T_W_B.block<3,3>(0,0) = this->quatToRotm(msg->rigid_bodies[i].pose_stamped.pose.orientation.x,
                                                msg->rigid_bodies[i].pose_stamped.pose.orientation.y,
                                                msg->rigid_bodies[i].pose_stamped.pose.orientation.z,
                                                msg->rigid_bodies[i].pose_stamped.pose.orientation.w);
                                                
       // We need to invert the rotation as somehow the MoCap measures the rotation from the rotated frame of the rigid body back to its initial frame,
       // instead of (e.g. what we want) computing the rotation from the initial frame to the rotated frame of the rigid body.
-      T_M_B.block<3,3>(0,0) = T_M_B.block<3,3>(0,0).transpose();
+      T_W_B.block<3,3>(0,0) = T_W_B.block<3,3>(0,0).transpose();
 
       //
-      //Compute the pose of the body in the robot base frame using T_0_M
-      T_0_B = T_0_M*T_M_B;
+      //Compute the pose of the body in the robot base frame using T_0_W
+      T_0_B = T_0_W*T_W_B;
       RCLCPP_DEBUG(this->get_logger(), "Transformation matrix from Rigid body %ld to robot base.\n", msg->rigid_bodies[i].id);
       RCLCPP_DEBUG(this->get_logger(), (static_cast<std::ostringstream&&>(std::ostringstream() << T_0_B)).str().c_str());
       //
@@ -149,11 +149,11 @@ void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::Ri
       rb.pose_stamped.pose.position.y = T_0_B(1, 3);
       rb.pose_stamped.pose.position.z = T_0_B(2, 3);
       //Store the attitude through the unit quaternion
-      q = this->rotmToQuat(T_0_M.block<3,3>(0,0)*T_M_B.block<3,3>(0,0)*T_0_M.block<3,3>(0,0).transpose());
-      rb.pose_stamped.pose.orientation.x = q(0);
-      rb.pose_stamped.pose.orientation.y = q(1);
-      rb.pose_stamped.pose.orientation.z = q(2);
-      rb.pose_stamped.pose.orientation.w = q(3);
+      xi_0_B = this->rotmToQuat(T_0_W.block<3,3>(0,0)*T_W_B.block<3,3>(0,0)*T_0_W.block<3,3>(0,0).transpose());
+      rb.pose_stamped.pose.orientation.x = xi_0_B(0);
+      rb.pose_stamped.pose.orientation.y = xi_0_B(1);
+      rb.pose_stamped.pose.orientation.z = xi_0_B(2);
+      rb.pose_stamped.pose.orientation.w = xi_0_B(3);
       //Push the message to the array of messages to send
       msg_r.rigid_bodies.push_back(rb);
   }
