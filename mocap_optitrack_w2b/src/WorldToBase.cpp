@@ -1,7 +1,9 @@
 #include <WorldToBase.h>
-#include <stdio.h>
-#include <eigen3/Eigen/Dense>
+
 #include <cmath>
+#include <eigen3/Eigen/Dense>
+#include <stdexcept>
+#include <stdio.h>
 
  
 using namespace Eigen;
@@ -100,8 +102,8 @@ void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::Ri
   // The rigid body associated to the base was not found
   if(i_base == -1)
   {
-    //TODO : decide what to do in this case, we just continue the process
     RCLCPP_ERROR(this->get_logger(), "Rigid body of the base not found.\n");
+    throw std::runtime_error("Could not transform pose estimates from world to robot base frame as did not find rigid body representing the base holder.");
   }
   // Store the pose of the robot base in the motion capture system
   T_W_0.block<3,3>(0,0) = quatToRotm(base_qx, base_qy, base_qz, base_qw);
