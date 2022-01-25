@@ -27,7 +27,7 @@ public:
     MoCapPublisher();
 
     // Send methods
-    void sendRigidBodyMessage(sRigidBodyData* bodies, int nRigidBodies);
+    void sendRigidBodyMessage(sRigidBodyData* bodies_ptr, int nRigidBodies);
  
     // Getters
     std::string getServerAddress();
@@ -37,7 +37,7 @@ public:
     uint16_t getServerDataPort();
     
     // Setters
-    
+
 };
  
 #endif

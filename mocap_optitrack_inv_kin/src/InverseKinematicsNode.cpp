@@ -26,7 +26,7 @@ InverseKinematicsNode::InverseKinematicsNode(): Node("inverse_kinematics")
     this->declare_parameter("segment_ls");
 
     this->declare_parameter<int>("base_id", 0);
-    this->declare_parameter<int>("2d_inverse_kinematics", 0);
+    this->declare_parameter<bool>("2d_inverse_kinematics", false);
     this->declare_parameter<std::string>("sub_topic", "baseframe_rigid_bodies");
     this->declare_parameter<std::string>("pub_topic", "robot_configuration");
     //
@@ -46,10 +46,10 @@ InverseKinematicsNode::InverseKinematicsNode(): Node("inverse_kinematics")
     this->publisher_ = this->create_publisher<mocap_optitrack_interfaces::msg::ConfigurationArray>(pub_topic, 10);
     //
     //Create the node responsible of handling the inverse kinematics
-    int IK_type;
+    bool IK_type;
     this->get_parameter("2d_inverse_kinematics", IK_type);
     switch (IK_type){
-        case 1:
+        case true:
             RCLCPP_INFO(this->get_logger(), "Created 2D IK node. Listening for incoming data...\n");
             this->ik = std::unique_ptr<InverseKinematics>(new InverseKinematics2D(this));
             break;
@@ -57,29 +57,7 @@ InverseKinematicsNode::InverseKinematicsNode(): Node("inverse_kinematics")
             RCLCPP_INFO(this->get_logger(), "Created 3D IK node. Listening for incoming data...\n");
             this->ik = std::unique_ptr<InverseKinematics>(new InverseKinematics3D(this));
     }
-
-    // PROVA DA RIMUOVERE
-    //timer_ = this->create_wall_timer(500ms, std::bind(&InverseKinematicsNode::timer_callback, this));
 }
-
-// DA RIMUOVERE
-void InverseKinematicsNode::timer_callback()
-{
-    // Creazione del messaggio
-    mocap_optitrack_interfaces::msg::ConfigurationArray msg;
-    mocap_optitrack_interfaces::msg::Configuration c1, c2, c3;
-    c1.delta_x = -1;c1.delta_y = 2;c1.delta_l = 3;
-    c2.delta_x = 0;c2.delta_y = 2;c2.delta_l = 4;
-    c3.delta_x = 1000;c3.delta_y = -20;c3.delta_l = 40;
-    
-    msg.configurations.push_back(c1);
-    msg.configurations.push_back(c2);
-    msg.configurations.push_back(c3);
-
-    RCLCPP_INFO(this->get_logger(), "Publishing the configuration...");
-    publisher_->publish(msg);
-}
-//
 
 //Topic to receive the message of rigid bodies
 void InverseKinematicsNode::rigid_body_topic_callback(const mocap_optitrack_interfaces::msg::RigidBodyArray::SharedPtr msg) const
