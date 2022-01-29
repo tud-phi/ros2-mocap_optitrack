@@ -125,7 +125,7 @@ void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::Ri
   RCLCPP_DEBUG(this->get_logger(), (static_cast<std::ostringstream&&>(std::ostringstream() << T_W_0)).str().c_str()); 
   //
   /* Get the transformation matrix from the robot base frame to the world frame by inverting T_W_0 */
-  T_W_0.block<3,3>(0,0).transposeInPlace();
+  T_0_W.block<3,3>(0,0) = T_W_0.block<3,3>(0,0).transpose();
   T_0_W.block<3,1>(0,3) = -T_0_W.block<3,3>(0,0)*T_W_0.block<3,1>(0,3);
   // RCLCPP_DEBUG(this->get_logger(), "Transformation matrix from the robot base frame to the world frame: \n"); 
   // RCLCPP_DEBUG(this->get_logger(), (static_cast<std::ostringstream&&>(std::ostringstream() << T_0_W)).str().c_str()); 
