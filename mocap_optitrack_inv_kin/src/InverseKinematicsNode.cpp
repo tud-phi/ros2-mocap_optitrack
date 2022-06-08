@@ -46,7 +46,7 @@ InverseKinematicsNode::InverseKinematicsNode(): Node("inverse_kinematics")
     this->publisher_ = this->create_publisher<mocap_optitrack_interfaces::msg::ConfigurationArray>(pub_topic, 10);
     //
     //Create the node responsible of handling the inverse kinematics
-    bool IK_type;
+    bool IK_type = false;
     this->get_parameter("2d_inverse_kinematics", IK_type);
     switch (IK_type){
         case true:
