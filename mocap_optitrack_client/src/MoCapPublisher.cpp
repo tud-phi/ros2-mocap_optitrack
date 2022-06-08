@@ -147,7 +147,7 @@ std::string MoCapPublisher::getServerAddress()
 
 int MoCapPublisher::getConnectionType()
 {
-  int type_;
+  int type_ = 0;
   this->get_parameter("connection_type", type_);
   return type_;
 }
