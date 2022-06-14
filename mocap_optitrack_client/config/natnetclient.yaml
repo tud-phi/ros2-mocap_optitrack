@@ -8,8 +8,11 @@ natnet_client:
     # a) run the docker container with the option : --add-host host.docker.internal:host-gateway.
     # or
     # b) run the container with the option --net host
-    server_address: "192.168.4.21"
-    # Type of the connection: 0 = multicase, 1 = unicast.
+    # If the NatNet server is hosted on another machine, please use the IP address of the other machine
+    # make sure to deactivate the Windows Firewall and check with ping if the IP is reachable
+    # Also, the IP of the correct network adapter needs to be selected in Motive
+    server_address: "192.168.4.31"
+    # Type of the connection: 0 = multicast, 1 = unicast.
     connection_type: 0 #default value: 0
     # Multicast address of the server
     multi_cast_address: "239.255.42.99" #default value : 239.255.42.99
