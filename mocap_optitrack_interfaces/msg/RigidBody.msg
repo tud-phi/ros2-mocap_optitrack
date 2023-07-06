@@ -1,3 +1,5 @@
+std_msgs/Header header
+
 # Message for a RigidBody of the NatNet server
 # Unique ID of the RigidBody, assigned by the the server
 int64 id

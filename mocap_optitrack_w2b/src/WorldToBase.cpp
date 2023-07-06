@@ -90,6 +90,7 @@ void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::Ri
   //
   Eigen::Vector4f xi_0_B; // vector that represents the unit quaternion of the rigid body in the robot base frame
   mocap_optitrack_interfaces::msg::RigidBodyArray msg_r;//message to send over the ROS2 network with the modified poses
+  msg_r.header = msg->header;
   //
   /* Get the pose of the base of the robot recorded by the motion capture system */
   for (i = 0; i < nRB; i++)
@@ -164,6 +165,8 @@ void WorldToBase::transformPoseAndSend(const mocap_optitrack_interfaces::msg::Ri
       //
       /* Save the tranformed pose in the new message*/
       mocap_optitrack_interfaces::msg::RigidBody rb = msg->rigid_bodies[i];
+      // Store the header
+      rb.pose_stamped.header = msg->rigid_bodies[i].pose_stamped.header;
       // Store the position
       rb.pose_stamped.pose.position.x = T_0_B(0, 3);
       rb.pose_stamped.pose.position.y = T_0_B(1, 3);
