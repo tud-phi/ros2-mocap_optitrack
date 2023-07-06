@@ -27,7 +27,7 @@ public:
     MoCapPublisher();
 
     // Send methods
-    void sendRigidBodyMessage(sRigidBodyData* bodies_ptr, int nRigidBodies);
+    void sendRigidBodyMessage(uint64_t cameraMidExposureTimestamp, sRigidBodyData* bodies_ptr, int nRigidBodies);
  
     // Getters
     std::string getServerAddress();

@@ -219,7 +219,7 @@ void NATNET_CALLCONV dataFrameHandler(sFrameOfMocapData* data, void* pUserData)
 	RCLCPP_DEBUG(pClient->getPublisher()->get_logger(), "Timecode : %s\n", szTimecode);
     //
 	// Rigid Bodies
-    pClient->sendRigidBodyMessage(data->RigidBodies, data->nRigidBodies);
+    pClient->sendRigidBodyMessage(data->CameraMidExposureTimestamp, data->RigidBodies, data->nRigidBodies);
     //
     //NOTE : from below is just logging...
 	// Skeletons
@@ -322,9 +322,9 @@ void NATNET_CALLCONV dataFrameHandler(sFrameOfMocapData* data, void* pUserData)
 }
 
 // Method responsible of forwarding messages of rigid body data to the ROS2 publisher
-void MoCapNatNetClient::sendRigidBodyMessage(sRigidBodyData* bodies, int nRigidBodies)
+void MoCapNatNetClient::sendRigidBodyMessage(uint64_t cameraMidExposureTimestamp, sRigidBodyData* bodies, int nRigidBodies)
 {
-    this->moCapPublisher->sendRigidBodyMessage(bodies, nRigidBodies);
+    this->moCapPublisher->sendRigidBodyMessage(cameraMidExposureTimestamp, bodies, nRigidBodies);
 }
 
 
