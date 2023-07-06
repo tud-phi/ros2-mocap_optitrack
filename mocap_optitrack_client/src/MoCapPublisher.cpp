@@ -32,6 +32,8 @@ MoCapPublisher::MoCapPublisher(): Node("natnet_client")
   this->declare_parameter<uint16_t>("server_command_port", 1510);
   this->declare_parameter<uint16_t>("server_data_port", 1511);
   this->declare_parameter<std::string>("pub_topic", "rigid_body_topic");
+  this->declare_parameter<bool>("start_recording", true);
+  this->declare_parameter<std::string>("take_name", NULL);
   //
   //Create the publisher
   std::string topic_;

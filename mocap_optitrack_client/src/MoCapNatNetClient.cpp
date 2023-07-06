@@ -35,7 +35,7 @@ MoCapNatNetClient::MoCapNatNetClient(MoCapPublisher* _moCapPublisher)
     this->SetFrameReceivedCallback( dataFrameHandler, this );
 }
 
-// Distructor
+// Destructor
 MoCapNatNetClient::~MoCapNatNetClient()
 {
     if ( this->pDataDefs )
