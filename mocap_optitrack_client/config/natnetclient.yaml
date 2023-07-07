@@ -22,3 +22,8 @@ natnet_client:
     server_data_port: 1511 #default value: 1511
     # Topic where data is published
     pub_topic: "mocap_rigid_bodies"
+    # wether to start the recording in Motive
+    record: true
+    # by default (with an empty string) the date and time will be used as name of the take
+    take_name: ""
+  

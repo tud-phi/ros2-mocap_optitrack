@@ -32,6 +32,8 @@ MoCapPublisher::MoCapPublisher(): Node("natnet_client")
   this->declare_parameter<uint16_t>("server_command_port", 1510);
   this->declare_parameter<uint16_t>("server_data_port", 1511);
   this->declare_parameter<std::string>("pub_topic", "rigid_body_topic");
+  this->declare_parameter<bool>("record", true);
+  this->declare_parameter<std::string>("take_name", "");
   //
   //Create the publisher
   std::string topic_;
@@ -170,6 +172,35 @@ uint16_t MoCapPublisher::getServerDataPort()
   return port_;
 }
 
+bool MoCapPublisher::isRecordingRequested()
+{
+  bool record_;
+  this->get_parameter("record", record_);
+  return record_;
+}
+
+std::string MoCapPublisher::getTakeName()
+{
+  std::string takeName_;
+  this->get_parameter("take_name", takeName_);
+
+  if (takeName_.empty())
+  {
+    // set take name to the current date and time in the format
+    time_t curr_time;
+    tm * curr_tm;
+    char datetime_string[100];
+    
+    time(&curr_time);
+    curr_tm = localtime(&curr_time);
+
+    // "take_20230101_235959"
+    strftime(datetime_string, 50, "take_%Y%m%d_%H%M%S", curr_tm);
+    takeName_ = std::string(datetime_string);
+  }
+
+  return takeName_;
+}
 
 // Main
 int main(int argc, char ** argv)
@@ -192,6 +223,8 @@ int main(int argc, char ** argv)
   }
   // Ready to receive marker stream
   rclcpp::spin(mocapPub);
+  // disconnect the clinet
+  c->disconnect();
   // Delete all the objects created
   delete c;
   rclcpp::shutdown();//delete the ROS2 nodes

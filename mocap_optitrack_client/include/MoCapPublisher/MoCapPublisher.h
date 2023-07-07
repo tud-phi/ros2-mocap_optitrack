@@ -35,6 +35,8 @@ public:
     std::string getMulticastAddress();
     uint16_t getServerCommandPort();
     uint16_t getServerDataPort();
+    bool isRecordingRequested();
+    std::string getTakeName();
     
     // Setters
 
