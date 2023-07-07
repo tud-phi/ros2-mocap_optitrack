@@ -62,7 +62,7 @@ public:
     // Setters
 
     //Methods to forward messages to the ROS2 system
-    void sendRigidBodyMessage(uint64_t cameraMidExposureTimestamp, sRigidBodyData* bodies, int nRigidBodies);
+    void sendRigidBodyMessage(double cameraMidExposureSecsSinceEpoch, sRigidBodyData* bodies, int nRigidBodies);
 
     
 };
