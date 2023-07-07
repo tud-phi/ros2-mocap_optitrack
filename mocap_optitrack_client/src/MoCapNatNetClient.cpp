@@ -110,6 +110,13 @@ int MoCapNatNetClient::connect()
     {
         RCLCPP_ERROR(this->moCapPublisher->get_logger(), "Error getting Analog frame rate.\n");
     }
+
+    // start recording if requested
+    this->recordingStarted_ = false;
+    if (moCapPublisher->isRecordingRequested()) {
+        this->recordingStarted_ = this->startRecording();
+    }
+
     //
     // Get all the objects from the server
     getDataDescription();
@@ -121,6 +128,14 @@ int MoCapNatNetClient::connect()
 /*Disconnect the client*/
 void MoCapNatNetClient::disconnect()
 {
+    // stop the recording if necessary
+    if (this->recordingStarted_) {
+        bool recordingStopped = this->stopRecording();
+        if (recordingStopped) {
+            this->recordingStarted_ = false;
+        }
+    }
+
     // Disconnect the client
     this->Disconnect();
 }
@@ -475,4 +490,32 @@ void MoCapNatNetClient::processCamera(sCameraDescription* pCamera)
     RCLCPP_INFO(this->moCapPublisher->get_logger(), "Camera Name : %s\n", pCamera->strName);
     RCLCPP_INFO(this->moCapPublisher->get_logger(), "Camera Position (%3.2f, %3.2f, %3.2f)\n", pCamera->x, pCamera->y, pCamera->z);
     RCLCPP_INFO(this->moCapPublisher->get_logger(), "Camera Orientation (%3.2f, %3.2f, %3.2f, %3.2f)\n", pCamera->qx, pCamera->qy, pCamera->qz, pCamera->qw);
+}
+
+bool MoCapNatNetClient::startRecording()
+{
+    ErrorCode ret = ErrorCode_OK;
+    void* pResult;
+    int nBytes = 0;
+    ret = this->SendMessageAndWait("StartRecording", &pResult, &nBytes);
+
+    if (ret != ErrorCode_OK) {
+        RCLCPP_ERROR(this->moCapPublisher->get_logger(), "Recording could not be started as the request was responded with error code %d", ret);
+    }
+
+    return ret == ErrorCode_OK;
+}
+
+bool MoCapNatNetClient::stopRecording()
+{
+    ErrorCode ret = ErrorCode_OK;
+    void* pResult;
+    int nBytes = 0;
+    ret = this->SendMessageAndWait("StopRecording", &pResult, &nBytes);
+
+    if (ret != ErrorCode_OK) {
+        RCLCPP_ERROR(this->moCapPublisher->get_logger(), "Recording could not be stopped as the request was responded with error code %d", ret);
+    }
+
+    return ret == ErrorCode_OK;
 }

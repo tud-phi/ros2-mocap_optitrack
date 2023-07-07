@@ -23,7 +23,7 @@ natnet_client:
     # Topic where data is published
     pub_topic: "mocap_rigid_bodies"
     # wether to start the recording in Motive
-    start_recording: true
+    record: true
     # by default (null) the date and time will be used as name of the take
     take_name: null
   

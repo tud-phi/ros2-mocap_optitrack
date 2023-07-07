@@ -32,8 +32,8 @@ MoCapPublisher::MoCapPublisher(): Node("natnet_client")
   this->declare_parameter<uint16_t>("server_command_port", 1510);
   this->declare_parameter<uint16_t>("server_data_port", 1511);
   this->declare_parameter<std::string>("pub_topic", "rigid_body_topic");
-  this->declare_parameter<bool>("start_recording", true);
-  this->declare_parameter<std::string>("take_name", NULL);
+  this->declare_parameter<bool>("record", true);
+  // this->declare_parameter<std::string>("take_name", NULL);
   //
   //Create the publisher
   std::string topic_;
@@ -175,6 +175,12 @@ uint16_t MoCapPublisher::getServerDataPort()
   return port_;
 }
 
+bool MoCapPublisher::isRecordingRequested()
+{
+  bool record_;
+  this->get_parameter("record", record_);
+  return record_;
+}
 
 // Main
 int main(int argc, char ** argv)
@@ -197,6 +203,8 @@ int main(int argc, char ** argv)
   }
   // Ready to receive marker stream
   rclcpp::spin(mocapPub);
+  // disconnect the clinet
+  c->disconnect();
   // Delete all the objects created
   delete c;
   rclcpp::shutdown();//delete the ROS2 nodes

@@ -27,6 +27,7 @@ private:
     MoCapPublisher* moCapPublisher;
     //const char* server_address;
     //const char* multicast_address;
+    bool recordingStarted_ = false;
     
     
     // Method to get the data description from the server
@@ -60,6 +61,10 @@ public:
     int getAnalogSamplesPerMocapFrame();
     MoCapPublisher* getPublisher();//returns the Ros2 publisher
     // Setters
+
+    // methods to manage the recording
+    bool startRecording();
+    bool stopRecording();
 
     //Methods to forward messages to the ROS2 system
     void sendRigidBodyMessage(sRigidBodyData* bodies, int nRigidBodies);
