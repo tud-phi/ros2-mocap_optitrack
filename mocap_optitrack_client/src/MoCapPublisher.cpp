@@ -38,9 +38,6 @@ MoCapPublisher::MoCapPublisher(): Node("natnet_client")
   this->get_parameter("pub_topic", topic_);
   this->publisher_ = this->create_publisher<mocap_optitrack_interfaces::msg::RigidBodyArray>(topic_.c_str(), 10);
   //
-  //Get the current time for the timestamp of the messages
-  this->t_start = high_resolution_clock::now();//get the current time
-  //
   //Just for testing purposes send make messages every 500ms
   //this->timer_ = this->create_wall_timer(500ms, std::bind(&MoCapPublisher::sendFakeMessage, this));
   //
@@ -54,7 +51,7 @@ MoCapPublisher::MoCapPublisher(): Node("natnet_client")
 }
 
 // Method that send over the ROS network the data of a rigid body
-void MoCapPublisher::sendRigidBodyMessage(sRigidBodyData* bodies_ptr, int nRigidBodies)
+void MoCapPublisher::sendRigidBodyMessage(double cameraMidExposureSecsSinceEpoch, sRigidBodyData* bodies_ptr, int nRigidBodies)
 {
   std::vector<sRigidBodyData> bodies;
   for(int i=0; i < nRigidBodies; i++) 
@@ -65,9 +62,14 @@ void MoCapPublisher::sendRigidBodyMessage(sRigidBodyData* bodies_ptr, int nRigid
   // sort rigid bodies by their id
   std::sort(bodies.begin(), bodies.end(), cmpRigidBodyId);
 
+  // Convert seconds since epoch to ROS time
+  int64_t cameraMidExposureNanoSecsSinceEpoch = int64_t(cameraMidExposureSecsSinceEpoch * 1e9);
+  rclcpp::Time cameraMidExposureTime = rclcpp::Time(cameraMidExposureNanoSecsSinceEpoch);
+
   //Instanciate variables
   mocap_optitrack_interfaces::msg::RigidBodyArray msg;
-  high_resolution_clock::time_point t_current;
+  msg.header.stamp = cameraMidExposureTime;
+
   // Log
   RCLCPP_INFO(get_logger(), "Sending message containing %d Rigid Bodies.\n\n", nRigidBodies);
   // Loop over all the rigid bodies
@@ -86,6 +88,7 @@ void MoCapPublisher::sendRigidBodyMessage(sRigidBodyData* bodies_ptr, int nRigid
       //
       //Create the rigid body message
       mocap_optitrack_interfaces::msg::RigidBody rb;
+      rb.header.stamp = cameraMidExposureTime;
       rb.id = bodies[i].ID;
       rb.valid =  bodies[i].params & 0x01;
       rb.mean_error = bodies[i].MeanError;
@@ -97,13 +100,7 @@ void MoCapPublisher::sendRigidBodyMessage(sRigidBodyData* bodies_ptr, int nRigid
       rb.pose_stamped.pose.orientation.z = bodies[i].qz;
       rb.pose_stamped.pose.orientation.w = bodies[i].qw;
       //
-      // Add the time stamp information both in seconds and nanoseconds
-      t_current = high_resolution_clock::now();
-      auto time_span_s  = duration_cast<seconds>(t_current - this->t_start);
-      auto time_span_ns = duration_cast<nanoseconds>(t_current - this->t_start);
-      //
-      rb.pose_stamped.header.stamp.sec = time_span_s.count();
-      rb.pose_stamped.header.stamp.nanosec = time_span_ns.count();
+      rb.pose_stamped.header.stamp = cameraMidExposureTime;
       //
       // Add the current rigid body to the array of rigid bodies
       msg.rigid_bodies.push_back(rb);
@@ -132,7 +129,7 @@ void MoCapPublisher::sendFakeMessage()
       bodies[i].params = 1;
     }
     //Send the message
-    this->sendRigidBodyMessage(bodies, nRigidBodies);
+    this->sendRigidBodyMessage(this->get_clock()->now().seconds(), bodies, nRigidBodies);
 
     //Free the rigid bodies
     free(bodies);

@@ -2,7 +2,7 @@
 #define INVERSEKINEMATICSNODE_H
 
 #include "rclcpp/rclcpp.hpp"
-#include "mocap_optitrack_interfaces/msg/configuration_array.hpp"
+#include "mocap_optitrack_interfaces/msg/pcc_delta_configuration.hpp"
 #include "mocap_optitrack_interfaces/msg/rigid_body_array.hpp"
 #include <stdio.h>
 
@@ -19,7 +19,7 @@ private:
 
     //Attributes
     rclcpp::Subscription<mocap_optitrack_interfaces::msg::RigidBodyArray>::SharedPtr subscription_;
-    rclcpp::Publisher<mocap_optitrack_interfaces::msg::ConfigurationArray>::SharedPtr publisher_;
+    rclcpp::Publisher<mocap_optitrack_interfaces::msg::PccDeltaConfiguration>::SharedPtr publisher_;
     std::unique_ptr<InverseKinematics> ik;
 
     //DA RIMUOVERE

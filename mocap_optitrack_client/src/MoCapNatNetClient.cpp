@@ -177,6 +177,9 @@ void NATNET_CALLCONV dataFrameHandler(sFrameOfMocapData* data, void* pUserData)
     // Only recent versions of the Motive software in combination with ethernet camera systems support system latency measurement.
     // If it's unavailable (for example, with USB camera systems, or during playback), this field will be zero.
     const bool bSystemLatencyAvailable = data->CameraMidExposureTimestamp != 0;
+    // Client latency is defined as the sum of system latency and the transit time taken to relay the data to the NatNet client.
+    // This is the all-inclusive measurement (photons to client processing).
+    double clientLatencyMillisec = transitLatencyMillisec;
     //
     if ( bSystemLatencyAvailable )
     {
@@ -189,7 +192,7 @@ void NATNET_CALLCONV dataFrameHandler(sFrameOfMocapData* data, void* pUserData)
 
         // Client latency is defined as the sum of system latency and the transit time taken to relay the data to the NatNet client.
         // This is the all-inclusive measurement (photons to client processing).
-        const double clientLatencyMillisec = pClient->SecondsSinceHostTimestamp( data->CameraMidExposureTimestamp ) * 1000.0;
+        clientLatencyMillisec = pClient->SecondsSinceHostTimestamp( data->CameraMidExposureTimestamp ) * 1000.0;
 
         // You could equivalently do the following (not accounting for time elapsed since we calculated transit latency above):
         //const double clientLatencyMillisec = systemLatencyMillisec + transitLatencyMillisec;
@@ -217,9 +220,15 @@ void NATNET_CALLCONV dataFrameHandler(sFrameOfMocapData* data, void* pUserData)
 	char szTimecode[128] = "";
     NatNet_TimecodeStringify( data->Timecode, data->TimecodeSubframe, szTimecode, 128 );
 	RCLCPP_DEBUG(pClient->getPublisher()->get_logger(), "Timecode : %s\n", szTimecode);
+
+    // Compute the UNIX time (in seconds) by checking the current clock time on the client machine and subtracting the total latency / delay
+    const double currentSecsSinceEpoch = pClient->getPublisher()->get_clock()->now().seconds();
+    const double cameraMidExposureSecsSinceEpoch = currentSecsSinceEpoch - clientLatencyMillisec / 1000;
+    RCLCPP_DEBUG(pClient->getPublisher()->get_logger(), "Mid camera exposure seconds since epoch : %.2lf seconds\n", cameraMidExposureSecsSinceEpoch);
+
     //
 	// Rigid Bodies
-    pClient->sendRigidBodyMessage(data->RigidBodies, data->nRigidBodies);
+    pClient->sendRigidBodyMessage(cameraMidExposureSecsSinceEpoch, data->RigidBodies, data->nRigidBodies);
     //
     //NOTE : from below is just logging...
 	// Skeletons
@@ -322,9 +331,9 @@ void NATNET_CALLCONV dataFrameHandler(sFrameOfMocapData* data, void* pUserData)
 }
 
 // Method responsible of forwarding messages of rigid body data to the ROS2 publisher
-void MoCapNatNetClient::sendRigidBodyMessage(sRigidBodyData* bodies, int nRigidBodies)
+void MoCapNatNetClient::sendRigidBodyMessage(double cameraMidExposureSecsSinceEpoch, sRigidBodyData* bodies, int nRigidBodies)
 {
-    this->moCapPublisher->sendRigidBodyMessage(bodies, nRigidBodies);
+    this->moCapPublisher->sendRigidBodyMessage(cameraMidExposureSecsSinceEpoch, bodies, nRigidBodies);
 }
 
 

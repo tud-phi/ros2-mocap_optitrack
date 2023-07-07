@@ -43,7 +43,7 @@ InverseKinematicsNode::InverseKinematicsNode(): Node("inverse_kinematics")
     this->get_parameter("pub_topic", pub_topic_);
     char* pub_topic = (char*) malloc(pub_topic_.length()*sizeof(char));
     strcpy(pub_topic, pub_topic_.c_str());
-    this->publisher_ = this->create_publisher<mocap_optitrack_interfaces::msg::ConfigurationArray>(pub_topic, 10);
+    this->publisher_ = this->create_publisher<mocap_optitrack_interfaces::msg::PccDeltaConfiguration>(pub_topic, 10);
     //
     //Create the node responsible of handling the inverse kinematics
     bool IK_type = false;
@@ -80,15 +80,17 @@ void InverseKinematicsNode::rigid_body_topic_callback(const mocap_optitrack_inte
     std::cout << q << std::endl;
     //TODO: must generalize to handle also the 2D case. For the case of NoElongation delta_l is just 0.
     //Create the message of configurations and publish it
-    mocap_optitrack_interfaces::msg::ConfigurationArray q_msg;
+    mocap_optitrack_interfaces::msg::PccDeltaConfiguration q_msg;
+    q_msg.header.stamp = msg->header.stamp;
     int msg_size = (int) q.rows()/3;
-    q_msg.configurations = std::vector<mocap_optitrack_interfaces::msg::Configuration>(msg_size);
+    q_msg.segment_configurations = std::vector<mocap_optitrack_interfaces::msg::CcDeltaConfiguration>(msg_size);
     int i= 0, k = 0;
     for (; i < msg_size; i++)
     {
-        q_msg.configurations[i].delta_x = q(k);
-        q_msg.configurations[i].delta_y = q(k+1);
-        q_msg.configurations[i].delta_l = q(k+2);
+        q_msg.segment_configurations[i].header.stamp = msg->header.stamp;
+        q_msg.segment_configurations[i].delta_x = q(k);
+        q_msg.segment_configurations[i].delta_y = q(k+1);
+        q_msg.segment_configurations[i].delta_l = q(k+2);
         k = k+3;
     }
     //Publish the message

@@ -1,2 +1,4 @@
-#Array of rigid bodies
+std_msgs/Header header
+
+# Array of rigid bodies
 RigidBody[] rigid_bodies
