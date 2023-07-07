@@ -179,7 +179,7 @@ void NATNET_CALLCONV dataFrameHandler(sFrameOfMocapData* data, void* pUserData)
     const bool bSystemLatencyAvailable = data->CameraMidExposureTimestamp != 0;
     // Client latency is defined as the sum of system latency and the transit time taken to relay the data to the NatNet client.
     // This is the all-inclusive measurement (photons to client processing).
-    double clientLatencyMillisec;
+    double clientLatencyMillisec = transitLatencyMillisec;
     //
     if ( bSystemLatencyAvailable )
     {
@@ -223,7 +223,7 @@ void NATNET_CALLCONV dataFrameHandler(sFrameOfMocapData* data, void* pUserData)
 
     // Compute the UNIX time (in seconds) by checking the current clock time on the client machine and subtracting the total latency / delay
     const double currentSecsSinceEpoch = pClient->getPublisher()->get_clock()->now().seconds();
-    const double cameraMidExposureSecsSinceEpoch = currentSecsSinceEpoch - (clientLatencyMillisec + transitLatencyMillisec) / 1000;
+    const double cameraMidExposureSecsSinceEpoch = currentSecsSinceEpoch - clientLatencyMillisec / 1000;
     RCLCPP_DEBUG(pClient->getPublisher()->get_logger(), "Mid camera exposure seconds since epoch : %.2lf seconds\n", cameraMidExposureSecsSinceEpoch);
 
     //
