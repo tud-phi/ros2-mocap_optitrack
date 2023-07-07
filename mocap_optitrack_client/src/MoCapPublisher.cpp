@@ -33,7 +33,7 @@ MoCapPublisher::MoCapPublisher(): Node("natnet_client")
   this->declare_parameter<uint16_t>("server_data_port", 1511);
   this->declare_parameter<std::string>("pub_topic", "rigid_body_topic");
   this->declare_parameter<bool>("record", true);
-  // this->declare_parameter<std::string>("take_name", NULL);
+  this->declare_parameter<std::string>("take_name", "");
   //
   //Create the publisher
   std::string topic_;
@@ -180,6 +180,29 @@ bool MoCapPublisher::isRecordingRequested()
   bool record_;
   this->get_parameter("record", record_);
   return record_;
+}
+
+std::string MoCapPublisher::getTakeName()
+{
+  std::string takeName_;
+  this->get_parameter("take_name", takeName_);
+
+  if (takeName_.empty())
+  {
+    // set take name to the current date and time in the format
+    time_t curr_time;
+    tm * curr_tm;
+    char datetime_string[100];
+    
+    time(&curr_time);
+    curr_tm = localtime(&curr_time);
+
+    // "take_20230101_235959"
+    strftime(datetime_string, 50, "take_%Y%m%d_%H%M%S", curr_tm);
+    takeName_ = std::string(datetime_string);
+  }
+
+  return takeName_;
 }
 
 // Main

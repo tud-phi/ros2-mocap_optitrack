@@ -111,6 +111,11 @@ int MoCapNatNetClient::connect()
         RCLCPP_ERROR(this->moCapPublisher->get_logger(), "Error getting Analog frame rate.\n");
     }
 
+    std::string takeName = moCapPublisher->getTakeName();
+    if (!takeName.empty()) {
+        this->setTakeName(takeName);
+    }
+
     // start recording if requested
     this->recordingStarted_ = false;
     if (moCapPublisher->isRecordingRequested()) {
@@ -500,7 +505,7 @@ bool MoCapNatNetClient::startRecording()
     ret = this->SendMessageAndWait("StartRecording", &pResult, &nBytes);
 
     if (ret != ErrorCode_OK) {
-        RCLCPP_ERROR(this->moCapPublisher->get_logger(), "Recording could not be started as the request was responded with error code %d", ret);
+        RCLCPP_ERROR(this->moCapPublisher->get_logger(), "Recording could not be started as the request returned error code %d", ret);
     }
 
     return ret == ErrorCode_OK;
@@ -514,7 +519,21 @@ bool MoCapNatNetClient::stopRecording()
     ret = this->SendMessageAndWait("StopRecording", &pResult, &nBytes);
 
     if (ret != ErrorCode_OK) {
-        RCLCPP_ERROR(this->moCapPublisher->get_logger(), "Recording could not be stopped as the request was responded with error code %d", ret);
+        RCLCPP_ERROR(this->moCapPublisher->get_logger(), "Recording could not be stopped as the request returned error code %d", ret);
+    }
+
+    return ret == ErrorCode_OK;
+}
+
+bool MoCapNatNetClient::setTakeName(std::string takeName)
+{
+    ErrorCode ret = ErrorCode_OK;
+    void* pResult;
+    int nBytes = 0;
+    ret = this->SendMessageAndWait(("SetRecordTakeName," + takeName).c_str(), &pResult, &nBytes);
+
+    if (ret != ErrorCode_OK) {
+        RCLCPP_ERROR(this->moCapPublisher->get_logger(), "Could not set recording take name as the request returned error code %d", ret);
     }
 
     return ret == ErrorCode_OK;

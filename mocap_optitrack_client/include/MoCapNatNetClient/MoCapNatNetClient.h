@@ -61,6 +61,7 @@ public:
     int getAnalogSamplesPerMocapFrame();
     MoCapPublisher* getPublisher();//returns the Ros2 publisher
     // Setters
+    bool setTakeName(std::string takeName);
 
     // methods to manage the recording
     bool startRecording();
