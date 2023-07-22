@@ -174,7 +174,7 @@ uint16_t MoCapPublisher::getServerDataPort()
 
 bool MoCapPublisher::isRecordingRequested()
 {
-  bool record_;
+  bool record_ = true;
   this->get_parameter("record", record_);
   return record_;
 }
