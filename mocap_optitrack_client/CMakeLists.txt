@@ -20,6 +20,11 @@ find_package(rclcpp REQUIRED)#publisher
 find_package(rclcpp_components REQUIRED)
 find_package(mocap_optitrack_interfaces REQUIRED)
 
+# Avoid warning about DOWNLOAD_EXTRACT_TIMESTAMP in CMake 3.24:
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
+  cmake_policy(SET CMP0135 NEW)
+endif()
+
 #Download the NatNet SDK library
 include(FetchContent)
 fetchcontent_declare(natnet_sdk_content
