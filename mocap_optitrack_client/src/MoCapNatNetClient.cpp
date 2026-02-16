@@ -10,7 +10,9 @@ MoCapNatNetClient::MoCapNatNetClient(MoCapPublisher* _moCapPublisher)
 {
     // Save the ROS2 publisher to send messages to this
     this->moCapPublisher = _moCapPublisher;
-    
+    this->markerPublisher_ = this->moCapPublisher->create_publisher<mocap_optitrack_interfaces::msg::MarkerArray>("marker_topic", 10);
+   
+
     // Create the connection parameters, retreiving the data from the ROS2 node
     if (moCapPublisher->getConnectionType() == 0) g_connectParams.connectionType = ConnectionType_Multicast;
     else g_connectParams.connectionType = ConnectionType_Unicast;
@@ -269,7 +271,9 @@ void NATNET_CALLCONV dataFrameHandler(sFrameOfMocapData* data, void* pUserData)
     //
     //
 	RCLCPP_DEBUG(pClient->getPublisher()->get_logger(), "Markers [Count=%d]\n", data->nLabeledMarkers);
-	for(i=0; i < data->nLabeledMarkers; i++)
+    pClient->sendMarkerMessage(data->LabeledMarkers, data->nLabeledMarkers, cameraMidExposureSecsSinceEpoch);
+    
+    for(i=0; i < data->nLabeledMarkers; i++)
 	{
         //Commented below some additional boolean variables about the markers
         //bool bOccluded = ((data->LabeledMarkers[i].params & 0x01)!=0);// marker was not visible (occluded) in this frame
@@ -356,6 +360,36 @@ void MoCapNatNetClient::sendRigidBodyMessage(double cameraMidExposureSecsSinceEp
     this->moCapPublisher->sendRigidBodyMessage(cameraMidExposureSecsSinceEpoch, bodies, nRigidBodies);
 }
 
+
+void MoCapNatNetClient::sendMarkerMessage(sMarker* markers, int nMarkers, double timestamp)
+{
+    // Creating the msg MarkerArray
+    mocap_optitrack_interfaces::msg::MarkerArray markerArrayMsg;
+    markerArrayMsg.header.stamp = rclcpp::Time(int64_t(timestamp * 1e9)); // Converting timestamp in ROS 2 time
+
+    for (int i = 0; i < nMarkers; i++) {
+        mocap_optitrack_interfaces::msg::Marker markerMsg;
+        markerMsg.id = markers[i].ID;
+        markerMsg.x = markers[i].x;
+        markerMsg.y = markers[i].y;
+        markerMsg.z = markers[i].z;
+        markerMsg.size = markers[i].size;
+
+        // Recognize marker type
+        if ((markers[i].params & 0x20) != 0) {
+            markerMsg.type = "Active";
+        } else if ((markers[i].params & 0x10) != 0) {
+            markerMsg.type = "Unlabeled";
+        } else {
+            markerMsg.type = "Labeled";
+        }
+
+        markerArrayMsg.markers.push_back(markerMsg);
+    }
+
+    // Publish the msg
+    this->markerPublisher_->publish(markerArrayMsg);
+}
 
 /*Method that gets the data description from the server*/
 void MoCapNatNetClient::getDataDescription()

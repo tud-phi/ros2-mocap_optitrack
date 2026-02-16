@@ -9,6 +9,7 @@
 #include <NatNetClient.h>
 #include <MoCapPublisher.h>
 
+#include <mocap_optitrack_interfaces/msg/marker_array.hpp>
 
 using namespace std;
 
@@ -29,6 +30,7 @@ private:
     //const char* multicast_address;
     bool recordingStarted_ = false;
     
+    rclcpp::Publisher<mocap_optitrack_interfaces::msg::MarkerArray>::SharedPtr markerPublisher_; // Marker Publisher
     
     // Method to get the data description from the server
     void getDataDescription();
@@ -69,7 +71,7 @@ public:
 
     //Methods to forward messages to the ROS2 system
     void sendRigidBodyMessage(double cameraMidExposureSecsSinceEpoch, sRigidBodyData* bodies, int nRigidBodies);
-
+    void sendMarkerMessage(sMarker* markers, int nMarkers, double timestamp);
     
 };
  
