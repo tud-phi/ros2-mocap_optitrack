@@ -9,8 +9,6 @@
 #include <NatNetClient.h>
 #include <MoCapPublisher.h>
 
-#include <mocap_optitrack_interfaces/msg/marker_array.hpp>
-
 using namespace std;
 
 // Handler to receive the data from the server
@@ -29,8 +27,6 @@ private:
     //const char* server_address;
     //const char* multicast_address;
     bool recordingStarted_ = false;
-    
-    rclcpp::Publisher<mocap_optitrack_interfaces::msg::MarkerArray>::SharedPtr markerPublisher_; // Marker Publisher
     
     // Method to get the data description from the server
     void getDataDescription();

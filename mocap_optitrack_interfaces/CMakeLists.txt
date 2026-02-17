@@ -30,8 +30,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/CcDeltaConfiguration.msg"
   "msg/PccDeltaConfiguration.msg"
   "msg/PlanarCsConfiguration.msg"
-  "msg/Marker.msg"               
-  "msg/MarkerArray.msg"  
+  "msg/Marker.msg"
+  "msg/MarkerArray.msg"
   DEPENDENCIES builtin_interfaces geometry_msgs std_msgs
  )
 

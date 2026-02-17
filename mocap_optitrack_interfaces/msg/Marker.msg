@@ -1,7 +1,7 @@
 # Marker.msg
+geometry_msgs/Point position
+# Marker position
 int64 id
-float64 x
-float64 y
-float64 z
-float64 size
+# Unique ID of the Marker
 string type
+# Marker type Active/Labeled/Unlabeled

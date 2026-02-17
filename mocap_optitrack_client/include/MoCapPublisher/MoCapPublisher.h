@@ -6,7 +6,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "mocap_optitrack_interfaces/msg/rigid_body_array.hpp"
-
+#include "mocap_optitrack_interfaces/msg/marker_array.hpp"
 
 using namespace std;
 using namespace std::chrono;
@@ -15,6 +15,7 @@ class MoCapPublisher: public rclcpp::Node
 private:
     //Attributes
     rclcpp::Publisher<mocap_optitrack_interfaces::msg::RigidBodyArray>::SharedPtr publisher_;
+    rclcpp::Publisher<mocap_optitrack_interfaces::msg::MarkerArray>::SharedPtr marker_publisher_;
     rclcpp::TimerBase::SharedPtr timer_;
     high_resolution_clock::time_point t_start;
 
@@ -28,6 +29,7 @@ public:
 
     // Send methods
     void sendRigidBodyMessage(double cameraMidExposureSecsSinceEpoch, sRigidBodyData* bodies_ptr, int nRigidBodies);
+    void sendMarkerMessage(sMarker* markers, int nMarkers, double timestamp);
  
     // Getters
     std::string getServerAddress();
