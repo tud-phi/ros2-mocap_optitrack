@@ -118,31 +118,31 @@ void MoCapPublisher::sendRigidBodyMessage(double cameraMidExposureSecsSinceEpoch
 // Method that sends marker messages over ROS
 void MoCapPublisher::sendMarkerMessage(sMarker* markers, int nMarkers, double timestamp)
 {
-    // Creating the msg MarkerArray
-    mocap_optitrack_interfaces::msg::MarkerArray markerArrayMsg;
-    markerArrayMsg.header.stamp = rclcpp::Time(int64_t(timestamp * 1e9)); // Converting timestamp in ROS 2 time
+  // Creating the msg MarkerArray
+  mocap_optitrack_interfaces::msg::MarkerArray markerArrayMsg;
+  markerArrayMsg.header.stamp = rclcpp::Time(int64_t(timestamp * 1e9)); // Converting timestamp in ROS 2 time
 
-    for (int i = 0; i < nMarkers; i++) {
-        mocap_optitrack_interfaces::msg::Marker markerMsg;
-        markerMsg.id = markers[i].ID;
-        markerMsg.position.x = markers[i].x;
-        markerMsg.position.y = markers[i].y;
-        markerMsg.position.z = markers[i].z;
+  for (int i = 0; i < nMarkers; i++) {
+    mocap_optitrack_interfaces::msg::Marker markerMsg;
+    markerMsg.id = markers[i].ID;
+    markerMsg.position.x = markers[i].x;
+    markerMsg.position.y = markers[i].y;
+    markerMsg.position.z = markers[i].z;
 
-        // Recognize marker type
-        if ((markers[i].params & 0x20) != 0) {
-            markerMsg.type = "Active";
-        } else if ((markers[i].params & 0x10) != 0) {
-            markerMsg.type = "Unlabeled";
-        } else {
-            markerMsg.type = "Labeled";
-        }
-
-        markerArrayMsg.markers.push_back(markerMsg);
+    // Recognize marker type
+    if ((markers[i].params & 0x20) != 0) {
+      markerMsg.type = "Active";
+    } else if ((markers[i].params & 0x10) != 0) {
+      markerMsg.type = "Unlabeled";
+    } else {
+      markerMsg.type = "Labeled";
     }
 
-    // Publish the msg
-    this->marker_publisher_->publish(markerArrayMsg);
+    markerArrayMsg.markers.push_back(markerMsg);
+  }
+
+  // Publish the msg
+  this->marker_publisher_->publish(markerArrayMsg);
 }
 
 //Method used to send fake messages to the client
