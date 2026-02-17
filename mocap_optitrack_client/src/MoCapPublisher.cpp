@@ -32,6 +32,7 @@ MoCapPublisher::MoCapPublisher(): Node("natnet_client")
   this->declare_parameter<uint16_t>("server_command_port", 1510);
   this->declare_parameter<uint16_t>("server_data_port", 1511);
   this->declare_parameter<std::string>("pub_topic", "rigid_body_topic");
+  this->declare_parameter<std::string>("marker_topic", "marker_topic");
   this->declare_parameter<bool>("record", true);
   this->declare_parameter<std::string>("take_name", "");
   //
@@ -39,6 +40,9 @@ MoCapPublisher::MoCapPublisher(): Node("natnet_client")
   std::string topic_;
   this->get_parameter("pub_topic", topic_);
   this->publisher_ = this->create_publisher<mocap_optitrack_interfaces::msg::RigidBodyArray>(topic_.c_str(), 10);
+  std::string marker_topic_;
+  this->get_parameter("marker_topic", marker_topic_);
+  this->marker_publisher_ = this->create_publisher<mocap_optitrack_interfaces::msg::MarkerArray>(marker_topic_.c_str(), 10);
   //
   //Just for testing purposes send make messages every 500ms
   //this->timer_ = this->create_wall_timer(500ms, std::bind(&MoCapPublisher::sendFakeMessage, this));
@@ -109,6 +113,36 @@ void MoCapPublisher::sendRigidBodyMessage(double cameraMidExposureSecsSinceEpoch
   }
   // Publish the message.
   publisher_->publish(msg);
+}
+
+// Method that sends marker messages over ROS
+void MoCapPublisher::sendMarkerMessage(sMarker* markers, int nMarkers, double timestamp)
+{
+  // Creating the msg MarkerArray
+  mocap_optitrack_interfaces::msg::MarkerArray markerArrayMsg;
+  markerArrayMsg.header.stamp = rclcpp::Time(int64_t(timestamp * 1e9)); // Converting timestamp in ROS 2 time
+
+  for (int i = 0; i < nMarkers; i++) {
+    mocap_optitrack_interfaces::msg::Marker markerMsg;
+    markerMsg.id = markers[i].ID;
+    markerMsg.position.x = markers[i].x;
+    markerMsg.position.y = markers[i].y;
+    markerMsg.position.z = markers[i].z;
+
+    // Recognize marker type
+    if ((markers[i].params & 0x20) != 0) {
+      markerMsg.type = "Active";
+    } else if ((markers[i].params & 0x10) != 0) {
+      markerMsg.type = "Unlabeled";
+    } else {
+      markerMsg.type = "Labeled";
+    }
+
+    markerArrayMsg.markers.push_back(markerMsg);
+  }
+
+  // Publish the msg
+  this->marker_publisher_->publish(markerArrayMsg);
 }
 
 //Method used to send fake messages to the client

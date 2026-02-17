@@ -10,7 +10,8 @@ MoCapNatNetClient::MoCapNatNetClient(MoCapPublisher* _moCapPublisher)
 {
     // Save the ROS2 publisher to send messages to this
     this->moCapPublisher = _moCapPublisher;
-    
+   
+
     // Create the connection parameters, retreiving the data from the ROS2 node
     if (moCapPublisher->getConnectionType() == 0) g_connectParams.connectionType = ConnectionType_Multicast;
     else g_connectParams.connectionType = ConnectionType_Unicast;
@@ -269,7 +270,9 @@ void NATNET_CALLCONV dataFrameHandler(sFrameOfMocapData* data, void* pUserData)
     //
     //
 	RCLCPP_DEBUG(pClient->getPublisher()->get_logger(), "Markers [Count=%d]\n", data->nLabeledMarkers);
-	for(i=0; i < data->nLabeledMarkers; i++)
+    pClient->sendMarkerMessage(data->LabeledMarkers, data->nLabeledMarkers, cameraMidExposureSecsSinceEpoch);
+    
+    for(i=0; i < data->nLabeledMarkers; i++)
 	{
         //Commented below some additional boolean variables about the markers
         //bool bOccluded = ((data->LabeledMarkers[i].params & 0x01)!=0);// marker was not visible (occluded) in this frame
@@ -356,6 +359,11 @@ void MoCapNatNetClient::sendRigidBodyMessage(double cameraMidExposureSecsSinceEp
     this->moCapPublisher->sendRigidBodyMessage(cameraMidExposureSecsSinceEpoch, bodies, nRigidBodies);
 }
 
+// Method responsible of forwarding messages of marker data to the ROS2 publisher
+void MoCapNatNetClient::sendMarkerMessage(sMarker* markers, int nMarkers, double timestamp)
+{
+    this->moCapPublisher->sendMarkerMessage(markers, nMarkers, timestamp);
+}
 
 /*Method that gets the data description from the server*/
 void MoCapNatNetClient::getDataDescription()

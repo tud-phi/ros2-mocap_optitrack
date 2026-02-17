@@ -9,7 +9,6 @@
 #include <NatNetClient.h>
 #include <MoCapPublisher.h>
 
-
 using namespace std;
 
 // Handler to receive the data from the server
@@ -28,7 +27,6 @@ private:
     //const char* server_address;
     //const char* multicast_address;
     bool recordingStarted_ = false;
-    
     
     // Method to get the data description from the server
     void getDataDescription();
@@ -69,7 +67,7 @@ public:
 
     //Methods to forward messages to the ROS2 system
     void sendRigidBodyMessage(double cameraMidExposureSecsSinceEpoch, sRigidBodyData* bodies, int nRigidBodies);
-
+    void sendMarkerMessage(sMarker* markers, int nMarkers, double timestamp);
     
 };
  
