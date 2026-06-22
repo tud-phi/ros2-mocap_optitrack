@@ -37,3 +37,5 @@ build/
 
 __pycache__/
 
+# WSL Artifact
+*:Zone.Identifier
