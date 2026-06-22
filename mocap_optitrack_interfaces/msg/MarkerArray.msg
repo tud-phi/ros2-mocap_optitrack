@@ -1,3 +1,4 @@
+# MarkerArray.msg
 std_msgs/Header header
-# Array of markers info
 Marker[] markers
+# Array of markers info
